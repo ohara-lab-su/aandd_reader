@@ -1,0 +1,4 @@
+root = true
+
+[*.pcs]
+charset = shift_jis
