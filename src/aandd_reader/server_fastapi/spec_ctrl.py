@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+"""
+Kengo NAKADA:
+https://github.com/shimane-dev, https://github.com/kengo-nakada
+kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
+"""
+from fastapi_frame.models.api_spec import ApiSpec
+
+# SPEC
+from aandd_reader.server_fastapi.models.comman import ResultResponse
+
+# ここで「APIの数だけ」ApiSpecを作る
+aandd_reader_api_spec = [
+    ApiSpec(
+        name="get_status",
+        object_name="aandd",
+        request_model=None,
+        response_model=ResultResponse,
+        method="post",
+        summary="get_status()",
+        description="""
+        """,
+    ),
+    ApiSpec(
+        name="get_unit",
+        object_name="aandd",
+        request_model=None,
+        response_model=ResultResponse,
+        method="post",
+        summary="get_unit()",
+        description="""
+        """,
+    ),
+    ApiSpec(
+        name="get_serial_number",
+        object_name="aandd",
+        request_model=None,
+        response_model=ResultResponse,
+        method="post",
+        summary="get_serial_number",
+        description="",
+    ),
+    ApiSpec(
+        name="cal",
+        object_name="aandd",
+        request_model=None,
+        response_model=ResultResponse,
+        method="post",
+        summary="cal()",
+        description="キャリブレーション",
+    ),
+    ApiSpec(
+        name="meas",
+        object_name="aandd",
+        request_model=None,
+        response_model=ResultResponse,
+        method="post",
+        summary="measure_single",
+        description="計測(status,unit)",
+    ),
+]

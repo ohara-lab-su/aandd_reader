@@ -1,1 +1,5 @@
 pyserial
+nest_asyncio
+pydantic
+pyyaml
+pytest
