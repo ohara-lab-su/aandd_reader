@@ -19,9 +19,11 @@ if __name__ == "__main__":
         log_level="debug",
         logger_name=Config.SERVER_LOGGER_NAME,
         log_mode="rotate",
-        log_name="c:/opt/log/aandd",
+        # log_mode="file",
+        log_name="c:/opt/log/aandd.log",
     )
-
+    logger.info(f"log_mode = {logger.log_mode}")
+    logger.info(f"log_name = {logger.log_name}")
     logger.info(f"PORT = {Config.PORT}")
 
     server = FastApiServer(
