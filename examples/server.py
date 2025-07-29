@@ -15,7 +15,12 @@ from x_logger.x_logger import XLogger
 
 if __name__ == "__main__":
     Config.load_yaml("config_server.yaml")
-    logger = XLogger(log_level="debug", logger_name=Config.SERVER_LOGGER_NAME)
+    logger = XLogger(
+        log_level="debug",
+        logger_name=Config.SERVER_LOGGER_NAME,
+        log_mode="rotate",
+        log_name="c:/opt/log/aandd",
+    )
 
     logger.info(f"PORT = {Config.PORT}")
 
