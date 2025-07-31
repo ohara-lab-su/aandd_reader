@@ -15,8 +15,8 @@ async def test_fastapi_async_meas():
     # httpx のログを WARNING レベル以上にする（INFO を抑制）
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    from aandd_reader.config import Config
-    from aandd_reader.server_fastapi.clients import AsyncAanddReaderClient
+    from aandd_reader import Config
+    from aandd_reader import AsyncAanddReaderClient
     from x_logger import XLogger
 
     Config.load_yaml("config_server.yaml")
