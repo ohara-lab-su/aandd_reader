@@ -13,7 +13,13 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+"pyserial",
+"nest_asyncio",
+"pydantic",
+"pyyaml",
+"pytest",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
