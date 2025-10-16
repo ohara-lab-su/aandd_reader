@@ -19,6 +19,12 @@ dependencies = [
 "pydantic",
 "pyyaml",
 "pytest",
+"sphinx",
+"myst-parser",
+"sphinx-autobuild",
+"sphinx-rtd-theme",
+"sphinxcontrib-napoleon",
+"linkify-it-py"
 ]
 
 [tool.pytest.ini_options]
