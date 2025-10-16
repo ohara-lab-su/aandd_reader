@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2025.10.16 v0.0.3
+
+- added sphinx module (project.toml)
+ 
 ## 2025.09.1 v0.0.2
 
 - fix toml
