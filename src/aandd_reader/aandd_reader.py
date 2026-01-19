@@ -26,17 +26,22 @@ class AanddReader:
         port: str,
         baud_rate: int | None = None,
         timeout: float | None = None,
-        logger: XLogger = None,
+        logger: Any = None,
     ):
         self._logger = logger
 
         self._port = port or "COM3"
         self._baud_rate = baud_rate or 19200
         self._timeout = timeout or 0.5
+        self._meas_mode = "Q"
+
         self._status = None
         self._unit = None
 
-        # FX-200i だと、baud rate 2400 しかダメ
+        self._logger.info(f"Create AandD Device (Serial)")
+        self._logger.info(f"timeout = {self._timeout}")
+        self._logger.info(f"baud_rate = {self._baud_rate}")
+        self._logger.info(f"port = {self._port}")
         try:
             self._ser = serial.Serial(
                 port=self._port,
@@ -114,14 +119,13 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return ""
 
-    def meas(self):
+    def q(self):
         """
-        Q
-        即時計測する
+        Q, 即時
 
         Returns:
-
         """
+
         status = ""
         weight = ""
         unit = ""
@@ -141,8 +145,58 @@ class AanddReader:
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
         else:
-            print(line)
+            self._logger.error(line)
         return weight
+
+    def s(self):
+        """
+        Q, 安定後、データ取得
+
+        Returns:
+        """
+        status = ""
+        weight = ""
+        unit = ""
+        try:
+            self._ser.write(b"S\r\n")
+            line = self._ser.readline()
+        except Exception as e:
+            self._logger.error(f"**Error**: {e}")
+            return status, weight, unit
+
+        if len(line) == 17:
+            line = line.rstrip()
+            try:
+                self._status = line[0:2].decode()  # 測定状態(ST:安定)
+                weight = line[3:12].decode()
+                self._unit = line[12:15].decode().strip()
+            except Exception as e:
+                self._logger.error(f"**Error**: {e}")
+        else:
+            self._logger.error(line)
+        return weight
+
+    def set_meas_mode(self, val: str = "Q"):
+        self._meas_mode: str = val
+
+    def get_meas_mode(self) -> str:
+        return self._meas_mode
+
+    def meas(
+        self,
+        mode: str = "Q",
+    ):
+        """
+        Q
+        即時計測する
+        Returns:
+        """
+        if mode.upper() == "Q":
+            return self.q()
+        elif mode.upper() == "S":
+            return self.s()
+        else:
+            return ""
 
 
 if __name__ == "__main__":
