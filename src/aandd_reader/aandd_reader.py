@@ -188,7 +188,7 @@ class AanddReader:
 
     def _q(
         self,
-    ):  # -> Union[bool, Tuple[Any, ...]]:
+    ) -> Union[bool, Tuple[str, str, str]]:
         """
         Q, 即時
 
@@ -199,11 +199,12 @@ class AanddReader:
         status = ""
         weight = ""
         unit = ""
+
         try:
             self._ser.write(b"Q\r\n")
             line = self._ser.readline()
         except Exception as e:
-            self._logger.error(f"**Error**: {e}")
+            self._logger.error(f"**Error(readline)**: {e}")
             return status, weight, unit
 
         # if b"EC,E02" in line:
@@ -217,12 +218,12 @@ class AanddReader:
                 weight = line[3:12].decode()
                 self._unit = line[12:15].decode().strip()
             except Exception as e:
-                self._logger.error(f"**Error**: {e}")
+                self._logger.error(f"**Error(line==18)**: {e}")
         else:
             self._logger.error(line)
             return False
 
-        return (weight,)
+        return status, weight, unit
 
     def _s(self):
         """
