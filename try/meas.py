@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     # Reset
     aandd_reader.reset()
-    # time.sleep(0.5)
+    time.sleep(0.5)
     ret = aandd_reader.meas()
     if ret is False:
         logger.error(ret)
