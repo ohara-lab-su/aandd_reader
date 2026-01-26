@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026.01.27 v0.0.4
+
+- bugfix
+- reset fnc
+
 ## 2025.10.16 v0.0.3
 
 - added sphinx module (project.toml)

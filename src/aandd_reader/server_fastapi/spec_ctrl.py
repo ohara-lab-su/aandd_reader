@@ -41,13 +41,13 @@ aandd_reader_api_spec = [
         description="",
     ),
     ApiSpec(
-        name="cal",
+        name="reset",
         object_name="aandd",
         request_model=None,
         response_model=ResultResponse,
         method="post",
-        summary="cal()",
-        description="キャリブレーション",
+        summary="reset",
+        description="zero-reset",
     ),
     ApiSpec(
         name="meas",
