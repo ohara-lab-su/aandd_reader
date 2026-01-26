@@ -26,8 +26,9 @@ if __name__ == "__main__":
     aandd_reader.reset()
     time.sleep(0.5)
     ret = aandd_reader.meas()
-    # if not ret:
-    #     logger.error(ret)
+    if not ret:
+        logger.error(ret)
+    logger.info(ret)
 
     # print(aandd_reader.get_serial_number())
     # while True:
