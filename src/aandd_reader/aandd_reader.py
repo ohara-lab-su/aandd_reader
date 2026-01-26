@@ -126,7 +126,9 @@ class AanddReader:
     # ---------------------------------
 
     def reset(self):
-        """reset"""
+        """reset
+        reset 後、測定するには 0.5 s くらい待たないとダメ
+        """
         return self._r()
 
     def meas(
@@ -186,7 +188,7 @@ class AanddReader:
 
     def _q(
         self,
-    ) -> Union[bool, Tuple[Any, ...]]:
+    ):  # -> Union[bool, Tuple[Any, ...]]:
         """
         Q, 即時
 
