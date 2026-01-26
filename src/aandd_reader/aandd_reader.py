@@ -206,9 +206,9 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return status, weight, unit
 
-        if b"EC,E02" in line:
-            self._logger.error(f"**Error**: {line}")
-            return False
+        # if b"EC,E02" in line:
+        #     self._logger.error(f"**Error**: {line}")
+        #     return False
 
         if len(line) == 18:
             line = line.rstrip()
