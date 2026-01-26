@@ -2,11 +2,10 @@
 基本トライ　ACK なしにする(出荷時)
 """
 
+from typing import Any, Dict, List, Optional, Union, Tuple, Callable, Sequence
 import serial
 import time
 import sys
-
-from x_logger import XLogger
 
 
 class AanddReader:
@@ -15,7 +14,7 @@ class AanddReader:
         天秤の 内部設定
             bPS (ボーレート) 19200bps
 
-    全てのコマンドに対しての何らかの応答
+    全てのコマンドに対しての何らかの応答(ACK)を返すモードであるのが前提
         天秤の 内部設定
             SF(シリアルインターフェース)
             ErCd 1 (出力する AK,コード)
@@ -24,10 +23,15 @@ class AanddReader:
     def __init__(
         self,
         port: str,
-        baud_rate: int | None = None,
-        timeout: float | None = None,
-        logger: Any = None,
+        baud_rate: Optional[int] = None,
+        timeout: Optional[float] = None,
+        logger: Optional[Any] = None,
     ):
+        if logger is None:
+            from x_logger import XLogger
+
+            logger = XLogger(log_level="info")
+
         self._logger = logger
 
         self._port = port or "COM3"
@@ -48,13 +52,16 @@ class AanddReader:
                 baudrate=self._baud_rate,
                 parity=serial.PARITY_EVEN,
                 bytesize=serial.SEVENBITS,
-                timeout=0.5,
+                timeout=self._timeout,
             )
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
 
     def __del__(self):
-        self._ser.close()
+        try:
+            self._ser.close()
+        except Exception as e:
+            pass
 
     def status(self):
         return self._status
@@ -104,20 +111,40 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return ""
 
-    def cal(self):
-        """キャリブレーション"""
-        self._logger.info(f"[CAL]")
+    # def cal(self):
+    #     """キャリブレーション(零点のリセットじゃないし、そもそも、このコマンドだけだと機能しない)"""
+    #     self._logger.info(f"[CAL]")
+    #     self._ser.reset_input_buffer()
+
+    #     try:
+    #         self._ser.write(b"CAL\r\n")
+    #         line = self._ser.readline().rstrip()
+    #         if not self.is_ack(line):
+    #             self._logger.error(f"ACK is False")
+
+    #     except Exception as e:
+    #         self._logger.error(f"**Error**: {e}")
+    #         return ""
+
+    def r(self) -> bool:
+        """reset"""
+        if self._ser is None:
+            raise RuntimeError("Serial port is not opened.")
+
         self._ser.reset_input_buffer()
+        self._ser.write(b"R\r\n")
 
         try:
-            self._ser.write(b"CAL\r\n")
-            line = self._ser.readline().rstrip()
-            if not self.is_ack(line):
-                self._logger.error(f"ACK is False")
-
+            line = self._ser.readline()
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
-            return ""
+            return False
+
+        if len(line) == 0:
+            self._logger.error("**Error**: No data received.")
+            return False
+
+        return line[0] == 0x06
 
     def q(self):
         """
@@ -125,6 +152,7 @@ class AanddReader:
 
         Returns:
         """
+        self._ser.reset_input_buffer()
 
         status = ""
         weight = ""
@@ -154,6 +182,8 @@ class AanddReader:
 
         Returns:
         """
+        self._ser.reset_input_buffer()
+
         status = ""
         weight = ""
         unit = ""
