@@ -101,6 +101,10 @@ class AanddReader:
                 unit = line[12:15].decode()
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
+
+        elif line.startswith(b"EC,E02"):
+            self._logger.error(f"**Error**: Device is busy. {line}")
+            # return "BUSY", "", ""
         else:
             print(line)
         return status, weight, unit
