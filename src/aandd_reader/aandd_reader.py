@@ -241,7 +241,7 @@ class AanddReader:
             self._logger.error(f"**Error(EC, E02)**: {line}")
             return False
 
-        if len(line) == 18:
+        if len(line) == 17:
             line = line.rstrip()
             try:
                 self._status = line[0:2].decode()  # 測定状態(ST:安定)
