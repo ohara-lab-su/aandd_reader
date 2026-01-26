@@ -102,7 +102,7 @@ class AanddReader:
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
 
-        elif line.startswith(b"EC,E02"):
+        elif b"EC,E02" in line:
             self._logger.error(f"**Error**: Device is busy. {line}")
             # return "BUSY", "", ""
         else:
