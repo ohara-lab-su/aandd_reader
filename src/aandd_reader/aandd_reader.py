@@ -226,6 +226,8 @@ class AanddReader:
         """
         self._ser.reset_input_buffer()
 
+        weight = ""
+
         try:
             self._ser.write(b"Q\r\n")
             line = self._ser.readline()
@@ -240,17 +242,17 @@ class AanddReader:
         if len(line) == 17:
             line = line.rstrip()
             try:
-                self._status = line[0:2].decode()  # 測定状態(ST:安定)
-                weight = line[3:12].decode()
-                self._unit = line[12:15].decode().strip()
+                self._status = str(line[0:2].decode())  # 測定状態(ST:安定)
+                weight = float(line[3:12].decode())
+                self._unit = str(line[12:15].decode().strip())
             except Exception as e:
-                self._logger.error(f"**Error(line==18)**: {e}")
+                self._logger.error(f"**Error(line==17)**: {e}")
+                return False
         else:
             self._logger.error(f"**Error(len(line)!=18)**: {line}")
             return False
 
-        # return status, weight, unit
-        return status, weight, unit
+        return weight
 
 
 if __name__ == "__main__":
