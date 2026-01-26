@@ -186,6 +186,36 @@ class AanddReader:
 
         return line[0] == 0x06
 
+    def _s(self):
+        """
+        Q, 安定後、データ取得
+
+        Returns:
+        """
+        self._ser.reset_input_buffer()
+
+        status = ""
+        weight = ""
+        unit = ""
+        try:
+            self._ser.write(b"S\r\n")
+            line = self._ser.readline()
+        except Exception as e:
+            self._logger.error(f"**Error**: {e}")
+            return status, weight, unit
+
+        if len(line) == 17:
+            line = line.rstrip()
+            try:
+                self._status = line[0:2].decode()  # 測定状態(ST:安定)
+                weight = line[3:12].decode()
+                self._unit = line[12:15].decode().strip()
+            except Exception as e:
+                self._logger.error(f"**Error**: {e}")
+        else:
+            self._logger.error(line)
+        return weight
+
     def _q(
         self,
     ) -> Union[bool, Tuple[str, str, str]]:
@@ -224,36 +254,6 @@ class AanddReader:
             return False
 
         return status, weight, unit
-
-    def _s(self):
-        """
-        Q, 安定後、データ取得
-
-        Returns:
-        """
-        self._ser.reset_input_buffer()
-
-        status = ""
-        weight = ""
-        unit = ""
-        try:
-            self._ser.write(b"S\r\n")
-            line = self._ser.readline()
-        except Exception as e:
-            self._logger.error(f"**Error**: {e}")
-            return status, weight, unit
-
-        if len(line) == 17:
-            line = line.rstrip()
-            try:
-                self._status = line[0:2].decode()  # 測定状態(ST:安定)
-                weight = line[3:12].decode()
-                self._unit = line[12:15].decode().strip()
-            except Exception as e:
-                self._logger.error(f"**Error**: {e}")
-        else:
-            self._logger.error(line)
-        return weight
 
 
 if __name__ == "__main__":
