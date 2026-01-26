@@ -2,11 +2,10 @@
 基本トライ　ACK なしにする(出荷時)
 """
 
+from typing import Any, Dict, List, Optional, Union, Tuple, Callable, Sequence
 import serial
 import time
 import sys
-
-from x_logger import XLogger
 
 
 class AanddReader:
@@ -15,7 +14,7 @@ class AanddReader:
         天秤の 内部設定
             bPS (ボーレート) 19200bps
 
-    全てのコマンドに対しての何らかの応答
+    全てのコマンドに対しての何らかの応答(ACK)を返すモードであるのが前提
         天秤の 内部設定
             SF(シリアルインターフェース)
             ErCd 1 (出力する AK,コード)
@@ -24,32 +23,45 @@ class AanddReader:
     def __init__(
         self,
         port: str,
-        baud_rate: int | None = None,
-        timeout: float | None = None,
-        logger: XLogger = None,
+        baud_rate: Optional[int] = None,
+        timeout: Optional[float] = None,
+        logger: Optional[Any] = None,
     ):
+        if logger is None:
+            from x_logger import XLogger
+
+            logger = XLogger(log_level="info")
+
         self._logger = logger
 
         self._port = port or "COM3"
         self._baud_rate = baud_rate or 19200
         self._timeout = timeout or 0.5
+        self._meas_mode = "Q"
+
         self._status = None
         self._unit = None
 
-        # FX-200i だと、baud rate 2400 しかダメ
+        self._logger.info(f"Create AandD Device (Serial)")
+        self._logger.info(f"timeout = {self._timeout}")
+        self._logger.info(f"baud_rate = {self._baud_rate}")
+        self._logger.info(f"port = {self._port}")
         try:
             self._ser = serial.Serial(
                 port=self._port,
                 baudrate=self._baud_rate,
                 parity=serial.PARITY_EVEN,
                 bytesize=serial.SEVENBITS,
-                timeout=0.5,
+                timeout=self._timeout,
             )
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
 
     def __del__(self):
-        self._ser.close()
+        try:
+            self._ser.close()
+        except Exception as e:
+            pass
 
     def status(self):
         return self._status
@@ -99,29 +111,49 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return ""
 
-    def cal(self):
-        """キャリブレーション"""
-        self._logger.info(f"[CAL]")
+    # def cal(self):
+    #     """キャリブレーション(零点のリセットじゃないし、そもそも、このコマンドだけだと機能しない)"""
+    #     self._logger.info(f"[CAL]")
+    #     self._ser.reset_input_buffer()
+
+    #     try:
+    #         self._ser.write(b"CAL\r\n")
+    #         line = self._ser.readline().rstrip()
+    #         if not self.is_ack(line):
+    #             self._logger.error(f"ACK is False")
+
+    #     except Exception as e:
+    #         self._logger.error(f"**Error**: {e}")
+    #         return ""
+
+    def r(self) -> bool:
+        """reset"""
+        if self._ser is None:
+            raise RuntimeError("Serial port is not opened.")
+
         self._ser.reset_input_buffer()
+        self._ser.write(b"R\r\n")
 
         try:
-            self._ser.write(b"CAL\r\n")
-            line = self._ser.readline().rstrip()
-            if not self.is_ack(line):
-                self._logger.error(f"ACK is False")
-
+            line = self._ser.readline()
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
-            return ""
+            return False
 
-    def meas(self):
+        if len(line) == 0:
+            self._logger.error("**Error**: No data received.")
+            return False
+
+        return line[0] == 0x06
+
+    def q(self):
         """
-        Q
-        即時計測する
+        Q, 即時
 
         Returns:
-
         """
+        self._ser.reset_input_buffer()
+
         status = ""
         weight = ""
         unit = ""
@@ -141,8 +173,60 @@ class AanddReader:
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
         else:
-            print(line)
+            self._logger.error(line)
         return weight
+
+    def s(self):
+        """
+        Q, 安定後、データ取得
+
+        Returns:
+        """
+        self._ser.reset_input_buffer()
+
+        status = ""
+        weight = ""
+        unit = ""
+        try:
+            self._ser.write(b"S\r\n")
+            line = self._ser.readline()
+        except Exception as e:
+            self._logger.error(f"**Error**: {e}")
+            return status, weight, unit
+
+        if len(line) == 17:
+            line = line.rstrip()
+            try:
+                self._status = line[0:2].decode()  # 測定状態(ST:安定)
+                weight = line[3:12].decode()
+                self._unit = line[12:15].decode().strip()
+            except Exception as e:
+                self._logger.error(f"**Error**: {e}")
+        else:
+            self._logger.error(line)
+        return weight
+
+    def set_meas_mode(self, val: str = "Q"):
+        self._meas_mode: str = val
+
+    def get_meas_mode(self) -> str:
+        return self._meas_mode
+
+    def meas(
+        self,
+        mode: str = "Q",
+    ):
+        """
+        Q
+        即時計測する
+        Returns:
+        """
+        if mode.upper() == "Q":
+            return self.q()
+        elif mode.upper() == "S":
+            return self.s()
+        else:
+            return ""
 
 
 if __name__ == "__main__":
