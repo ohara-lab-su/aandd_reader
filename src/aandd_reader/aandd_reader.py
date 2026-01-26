@@ -218,7 +218,7 @@ class AanddReader:
 
     def _q(
         self,
-    ) -> Union[boo, Union[str, Tuple[str, str, str]]]:
+    ) -> Union[bool, Union[float, Tuple[str, str, str]]]:
         """
         Q, 即時
 
@@ -249,7 +249,7 @@ class AanddReader:
                 self._logger.error(f"**Error(line==17)**: {e}")
                 return False
         else:
-            self._logger.error(f"**Error(len(line)!=18)**: {line}")
+            self._logger.error(f"**Error(len(line)!=17)**: {line}")
             return False
 
         return weight

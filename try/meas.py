@@ -5,6 +5,7 @@ Kengo NAKADA:
 https://github.com/shimane-dev, https://github.com/kengo-nakada
 kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 """
+import sys
 import time
 from aandd_reader import AanddReader
 from x_logger import XLogger
@@ -24,10 +25,11 @@ if __name__ == "__main__":
 
     # Reset
     aandd_reader.reset()
-    time.sleep(0.5)
+    # time.sleep(0.5)
     ret = aandd_reader.meas()
-    if not ret:
+    if ret is False:
         logger.error(ret)
+        sys.exit(1)
     logger.info(ret)
 
     # print(aandd_reader.get_serial_number())
