@@ -218,7 +218,7 @@ class AanddReader:
 
     def _q(
         self,
-    ):
+    ) -> Union[boo, Union[str, Tuple[str, str, str]]]:
         """
         Q, 即時
 
@@ -226,16 +226,12 @@ class AanddReader:
         """
         self._ser.reset_input_buffer()
 
-        status = ""
-        weight = ""
-        unit = ""
-
         try:
             self._ser.write(b"Q\r\n")
             line = self._ser.readline()
         except Exception as e:
             self._logger.error(f"**Error(readline)**: {e}")
-            return status, weight, unit
+            return False
 
         if b"EC,E02" in line:
             self._logger.error(f"**Error(EC, E02)**: {line}")
