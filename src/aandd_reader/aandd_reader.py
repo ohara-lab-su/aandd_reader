@@ -41,6 +41,7 @@ class AanddReader:
 
         self._status = None
         self._unit = None
+        self._weight: Opitional[float] = None
 
         self._logger.info(f"Create AandD Device (Serial)")
         self._logger.info(f"timeout = {self._timeout}")
@@ -107,8 +108,10 @@ class AanddReader:
                     serial_number = line[3:11].decode()
                 except Exception as e:
                     self._logger.error(f"**Error**: {e}")
+                    return False
             else:
                 self._logger.error(line)
+                return False
             return serial_number
 
         except Exception as e:
@@ -133,13 +136,16 @@ class AanddReader:
 
     def meas(
         self,
-        mode: str = "Q",
+        mode: Optional[str] = None,
     ):
         """
         Q
         即時計測する
         Returns:
         """
+        if mode is None:
+            mode = self._meas_mode
+
         if mode.upper() == "Q":
             return self._q()
         elif mode.upper() == "S":
@@ -166,10 +172,63 @@ class AanddReader:
     #         self._logger.error(f"**Error**: {e}")
     #         return ""
 
-    def _r(self) -> bool:
-        """reset"""
+    def _stream(
+        self,
+    ) -> Union[float, Optional[bool]]:
+        """
+        ストリームデータを1行読む
+
+        1/10d
+        sample
+
+        1. 長押し(2sec)
+        2. bASFnc (分類項目) 1/10d 押すたびに変わる
+           ...
+
+        オートプリントモードA 設定
+        --> dout
+        --> Prt
+        --> Prt 1  (一回目を押したら、Aモード(1)に変更
+
+        """
         if self._ser is None:
-            raise RuntimeError("Serial port is not opened.")
+            self._logger.error("Serial port is not opened.")
+            return False
+
+        try:
+            line = self._ser.readline()
+        except Exception as e:
+            self._logger.error(f"**Error**: {e}")
+            return False
+
+        if not line:
+            self._logger.error("No data received.")
+            return False
+
+        # 例: b'ST,+0000.000  g\r\n'
+        line = line.rstrip()
+
+        # 長さチェックは「厳密に固定しない」
+        # フォーマット前提で切る
+        try:
+            self._status = str(line[0:2].decode())
+            self._weight = float(line[3:12].decode())
+            self._unit = str(line[12:15].decode().strip())
+        except Exception:
+            return False
+
+        return self._weight
+
+    def _r(
+        self,
+    ) -> Union[str, bool]:
+        """reset
+        reset 後、測定するには 0.5 s くらい待たないとダメ
+        """
+        if self._ser is None:
+            # raise RuntimeError("Serial port is not opened.")
+            self._logger.error("Serial port is not opened.")
+            return False
 
         self._ser.reset_input_buffer()
         self._ser.write(b"R\r\n")
@@ -186,35 +245,40 @@ class AanddReader:
 
         return line[0] == 0x06
 
-    def _s(self):
+    def _s(
+        self,
+    ) -> Union[bool, Union[str, float, None]]:
         """
         Q, 安定後、データ取得
 
         Returns:
         """
+        if self._ser is None:
+            self._logger.error("Serial port is not opened.")
+            return False
+
         self._ser.reset_input_buffer()
 
-        status = ""
-        weight = ""
-        unit = ""
         try:
             self._ser.write(b"S\r\n")
             line = self._ser.readline()
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
-            return status, weight, unit
+            return False
 
         if len(line) == 17:
             line = line.rstrip()
             try:
                 self._status = line[0:2].decode()  # 測定状態(ST:安定)
-                weight = line[3:12].decode()
+                self._weight = line[3:12].decode()
                 self._unit = line[12:15].decode().strip()
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
+                return False
         else:
             self._logger.error(line)
-        return weight
+            return False
+        return self._weight
 
     def _q(
         self,
@@ -224,9 +288,10 @@ class AanddReader:
 
         Returns:
         """
+        if self._ser is None:
+            self._logger.error("Serial port is not opened.")
+            return False
         self._ser.reset_input_buffer()
-
-        weight = ""
 
         try:
             self._ser.write(b"Q\r\n")
@@ -236,6 +301,7 @@ class AanddReader:
             return False
 
         if b"EC,E02" in line:
+            # 計測時間が短くて前回の命令動作を本体足しているときなど
             self._logger.error(f"**Error(EC, E02)**: {line}")
             return False
 
@@ -243,7 +309,7 @@ class AanddReader:
             line = line.rstrip()
             try:
                 self._status = str(line[0:2].decode())  # 測定状態(ST:安定)
-                weight = float(line[3:12].decode())
+                self._weight = float(line[3:12].decode())
                 self._unit = str(line[12:15].decode().strip())
             except Exception as e:
                 self._logger.error(f"**Error(line==17)**: {e}")
@@ -252,7 +318,7 @@ class AanddReader:
             self._logger.error(f"**Error(len(line)!=17)**: {line}")
             return False
 
-        return weight
+        return self._weight
 
 
 if __name__ == "__main__":

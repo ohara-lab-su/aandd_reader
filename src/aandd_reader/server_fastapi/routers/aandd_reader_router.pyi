@@ -18,13 +18,19 @@ class AanddReaderRouter:
     def _make_handler(self, api): ...
     _logger: XLogger
     router: APIRouter
-    # get_status() 
+    # get_status()
+    # 
+        
     async def get_status(self) -> Any: ...
-    # get_unit() 
+    # get_unit()
+    # 
+        
     async def get_unit(self) -> Any: ...
     # get_serial_number
     async def get_serial_number(self) -> Any: ...
-    # cal() キャリブレーション
-    async def cal(self) -> Any: ...
-    # measure_single 計測(status,unit)
+    # reset
+    # zero-reset
+    async def reset(self) -> Any: ...
+    # measure_single
+    # 計測(status,unit)
     async def meas(self) -> Any: ...
