@@ -207,9 +207,9 @@ class AanddReader:
             self._logger.error(f"**Error(readline)**: {e}")
             return status, weight, unit
 
-        # if b"EC,E02" in line:
-        #     self._logger.error(f"**Error**: {line}")
-        #     return False
+        if b"EC,E02" in line:
+            self._logger.error(f"**Error(EC, E02)**: {line}")
+            return False
 
         if len(line) == 18:
             line = line.rstrip()
@@ -220,7 +220,7 @@ class AanddReader:
             except Exception as e:
                 self._logger.error(f"**Error(line==18)**: {e}")
         else:
-            self._logger.error(line)
+            self._logger.error(f"**Error(len(line)!=18)**: {line}")
             return False
 
         return status, weight, unit

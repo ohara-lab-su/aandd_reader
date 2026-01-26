@@ -24,8 +24,10 @@ if __name__ == "__main__":
 
     # Reset
     aandd_reader.reset()
-    # time.sleep(0.1)
-    print(aandd_reader.meas())
+    time.sleep(0.5)
+    ret = aandd_reader.meas()
+    # if not ret:
+    #     logger.error(ret)
 
     # print(aandd_reader.get_serial_number())
     # while True:
