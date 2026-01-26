@@ -9,6 +9,7 @@ import time
 from aandd_reader import AanddReader
 from x_logger import XLogger
 
+
 if __name__ == "__main__":
 
     log_mode = "file"
@@ -21,13 +22,15 @@ if __name__ == "__main__":
 
     aandd_reader = AanddReader(port="COM4", logger=logger)
 
-    # キャリブレーション
-    # aandd_reader.cal()
+    # Reset
+    aandd_reader.reset()
+    # time.sleep(0.1)
+    print(aandd_reader.meas())
 
     # print(aandd_reader.get_serial_number())
-    while True:
-        logger.info(aandd_reader.meas())
-        time.sleep(0.05)
+    # while True:
+    #     logger.info(aandd_reader.meas())
+    #     time.sleep(0.05)
 
     # print(aandd_reader.status())
     # print(aandd_reader.unit())

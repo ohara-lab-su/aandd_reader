@@ -63,6 +63,10 @@ class AanddReader:
         except Exception as e:
             pass
 
+    # ---------------------------
+    # Device Info API
+    # ---------------------------
+
     def status(self):
         return self._status
 
@@ -111,6 +115,40 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return ""
 
+    def set_meas_mode(self, val: str = "Q"):
+        self._meas_mode: str = val
+
+    def get_meas_mode(self) -> str:
+        return self._meas_mode
+
+    # ---------------------------------
+    # Device Ctrl API
+    # ---------------------------------
+
+    def reset(self):
+        """reset"""
+        return self._r()
+
+    def meas(
+        self,
+        mode: str = "Q",
+    ):
+        """
+        Q
+        即時計測する
+        Returns:
+        """
+        if mode.upper() == "Q":
+            return self._q()
+        elif mode.upper() == "S":
+            return self._s()
+        else:
+            return ""
+
+    # ---------------------------------
+    # Device Ctrl Driver
+    # ---------------------------------
+
     # def cal(self):
     #     """キャリブレーション(零点のリセットじゃないし、そもそも、このコマンドだけだと機能しない)"""
     #     self._logger.info(f"[CAL]")
@@ -126,7 +164,7 @@ class AanddReader:
     #         self._logger.error(f"**Error**: {e}")
     #         return ""
 
-    def r(self) -> bool:
+    def _r(self) -> bool:
         """reset"""
         if self._ser is None:
             raise RuntimeError("Serial port is not opened.")
@@ -146,7 +184,7 @@ class AanddReader:
 
         return line[0] == 0x06
 
-    def q(self):
+    def _q(self):
         """
         Q, 即時
 
@@ -164,7 +202,7 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return status, weight, unit
 
-        if len(line) == 17:
+        if len(line) == 18:
             line = line.rstrip()
             try:
                 self._status = line[0:2].decode()  # 測定状態(ST:安定)
@@ -176,7 +214,7 @@ class AanddReader:
             self._logger.error(line)
         return weight
 
-    def s(self):
+    def _s(self):
         """
         Q, 安定後、データ取得
 
@@ -205,28 +243,6 @@ class AanddReader:
         else:
             self._logger.error(line)
         return weight
-
-    def set_meas_mode(self, val: str = "Q"):
-        self._meas_mode: str = val
-
-    def get_meas_mode(self) -> str:
-        return self._meas_mode
-
-    def meas(
-        self,
-        mode: str = "Q",
-    ):
-        """
-        Q
-        即時計測する
-        Returns:
-        """
-        if mode.upper() == "Q":
-            return self.q()
-        elif mode.upper() == "S":
-            return self.s()
-        else:
-            return ""
 
 
 if __name__ == "__main__":
