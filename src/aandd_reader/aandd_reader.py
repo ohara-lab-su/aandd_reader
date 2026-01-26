@@ -184,7 +184,9 @@ class AanddReader:
 
         return line[0] == 0x06
 
-    def _q(self):
+    def _q(
+        self,
+    ) -> Union[boo, Tuple[Any, ...]]:
         """
         Q, 即時
 
@@ -202,6 +204,10 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return status, weight, unit
 
+        if b"EC,E02" in line:
+            self._logger.error(f"**Error**: {line}")
+            return False
+
         if len(line) == 18:
             line = line.rstrip()
             try:
@@ -212,7 +218,9 @@ class AanddReader:
                 self._logger.error(f"**Error**: {e}")
         else:
             self._logger.error(line)
-        return weight
+            return False
+
+        return (weight,)
 
     def _s(self):
         """
