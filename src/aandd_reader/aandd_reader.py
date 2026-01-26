@@ -186,7 +186,7 @@ class AanddReader:
 
     def _q(
         self,
-    ) -> Union[boo, Tuple[Any, ...]]:
+    ) -> Union[bool, Tuple[Any, ...]]:
         """
         Q, 即時
 
