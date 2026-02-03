@@ -5,6 +5,7 @@
 from typing import Any, Dict, List, Optional, Union, Tuple, Callable, Sequence
 import serial
 import time
+import threading
 import sys
 
 
@@ -41,7 +42,7 @@ class AanddReader:
 
         self._status = None
         self._unit = None
-        self._weight: Opitional[float] = None
+        self._weight: Optional[float] = None
 
         self._logger.info(f"Create AandD Device (Serial)")
         self._logger.info(f"timeout = {self._timeout}")
