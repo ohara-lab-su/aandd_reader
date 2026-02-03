@@ -12,3 +12,14 @@ from pydantic import BaseModel
 class ResultResponse(BaseModel):
     result: Optional[Any]
     # message: Optional[str] = None
+
+
+class SetMeasModeRequest(BaseModel):
+    mode: str
+
+
+class StreamStartRequest(BaseModel):
+    threshold: Optional[float] = None
+    stable_only: Optional[bool] = False
+    hysteresis: Optional[float] = None
+    poll_interval: Optional[float] = None
