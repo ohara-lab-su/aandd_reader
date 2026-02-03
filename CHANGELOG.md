@@ -2,6 +2,13 @@
 
 ## 2026.02.03 v0.0.5, nakada
 
+alpha版(正式に使える形になってない)
+
+- stream モードで動作する スレッド型
+  - client から longpolling されて
+  - 重さが閾値を超えたら client 側で好きな実行が可能にする
+
+
 ## 2026.01.27 v0.0.4, nakada
 
 - bugfix

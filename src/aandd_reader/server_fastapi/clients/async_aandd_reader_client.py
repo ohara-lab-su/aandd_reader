@@ -8,7 +8,7 @@ import re
 import asyncio
 import nest_asyncio
 from pathlib import Path
-from typing import Union, Optional, Set
+from typing import Union, Optional, Set, Callable, Tuple
 
 from aandd_reader.config import Config
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
@@ -47,6 +47,8 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
             base_url=base_url,
             logger=logger,
         )
+
+        self._threshold_task = None
 
     #
     # property style で一部メソッドを使えるようにする
@@ -88,3 +90,54 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
     #             self._sync_await(self.set_var(kind, id_num, value))
     #             return
     #     super().__setattr__(name, value)
+
+    # ---------------------------------
+    # stream mode 機能(alpha版)
+    # ---------------------------------
+
+    def _init_threshold_listener(self):
+        if not hasattr(self, "_threshold_task"):
+            self._threshold_task = None
+            self._threshold_stop = asyncio.Event()
+
+    async def start_threshold_listener(
+        self,
+        threshold: float,
+        on_threshold: Callable[[Optional[str], Optional[float], Optional[str]], None],
+        stable_only: bool = False,
+        hysteresis: float = 0.0,
+        timeout_sec: float = 10.0,
+    ) -> None:
+        """wait_threshold の戻り値(タプル)を使って、閾値到達時にコールバックを呼ぶ。"""
+        self._init_threshold_listener()
+        if self._threshold_task and not self._threshold_task.done():
+            return
+
+        self._threshold_stop.clear()
+
+        async def _loop():
+            while not self._threshold_stop.is_set():
+                result: Tuple[bool, Optional[str], Optional[float], Optional[str]] = (
+                    await self.wait_threshold(
+                        threshold=threshold,
+                        stable_only=stable_only,
+                        hysteresis=hysteresis,
+                        timeout_sec=timeout_sec,
+                    )
+                )
+                triggered, status, weight, unit = result
+                if triggered:
+                    try:
+                        on_threshold(status, weight, unit)
+                    except Exception as e:
+                        if hasattr(self, "_logger") and self._logger:
+                            self._logger.error(f"**Error(on_threshold)**: {e}")
+                await asyncio.sleep(0.01)
+
+        self._threshold_task = asyncio.create_task(_loop())
+
+    async def stop_threshold_listener(self) -> None:
+        self._init_threshold_listener()
+        self._threshold_stop.set()
+        if self._threshold_task:
+            await self._threshold_task

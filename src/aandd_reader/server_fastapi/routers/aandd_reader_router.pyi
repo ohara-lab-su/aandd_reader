@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from aandd_reader.server_fastapi.models.comman import ResultResponse
+from aandd_reader.server_fastapi.models.comman import ResultResponse, SetMeasModeRequest, StreamStartRequest, ThresholdEventResponse, WaitThresholdRequest
 from x_logger.x_logger import XLogger
 from fastapi import APIRouter
 class AanddReaderRouter:
@@ -34,3 +34,18 @@ class AanddReaderRouter:
     # measure_single
     # 計測(status,unit)
     async def meas(self) -> Any: ...
+    # get_meas_mode
+    # measのモードを取得
+    async def get_meas_mode(self) -> Any: ...
+    # set_meas_mode
+    # measのモードを設定 (Q/S)
+    async def set_meas_mode(self, request: Optional[SetMeasModeRequest | str] = None) -> Any: ...
+    # start_stream
+    # バックグラウンドでストリーム計測開始
+    async def stream_start(self, request: Optional[StreamStartRequest | Optional | Optional | Optional | Optional] = None) -> Any: ...
+    # stop_stream
+    # ストリーム計測停止
+    async def stream_stop(self) -> Any: ...
+    # wait_threshold
+    # 閾値を超えるまで待機して1回だけ返す
+    async def wait_threshold(self, request: Optional[WaitThresholdRequest | float | Optional | Optional | Optional] = None) -> Any: ...

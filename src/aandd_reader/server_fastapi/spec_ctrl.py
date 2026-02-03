@@ -7,7 +7,13 @@ kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 from fastapi_frame.models.api_spec import ApiSpec
 
 # SPEC
-from aandd_reader.server_fastapi.models.comman import ResultResponse
+from aandd_reader.server_fastapi.models.comman import (
+    ResultResponse,
+    SetMeasModeRequest,
+    StreamStartRequest,
+    WaitThresholdRequest,
+    ThresholdEventResponse,
+)
 
 # ここで「APIの数だけ」ApiSpecを作る
 aandd_reader_api_spec = [
@@ -76,6 +82,9 @@ aandd_reader_api_spec = [
         summary="set_meas_mode",
         description="measのモードを設定 (Q/S)",
     ),
+    # ---------------------------------
+    # stream mode 機能(alpha版)
+    # ---------------------------------
     ApiSpec(
         name="stream_start",
         object_name="aandd",
@@ -93,5 +102,14 @@ aandd_reader_api_spec = [
         method="post",
         summary="stop_stream",
         description="ストリーム計測停止",
+    ),
+    ApiSpec(
+        name="wait_threshold",
+        object_name="aandd",
+        request_model=WaitThresholdRequest,
+        response_model=ThresholdEventResponse,
+        method="post",
+        summary="wait_threshold",
+        description="閾値を超えるまで待機して1回だけ返す",
     ),
 ]
