@@ -58,6 +58,17 @@ class AanddReader:
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
 
+        # stream / background mode
+        self._stream_thread = None
+        self._stream_stop = threading.Event()
+        self._stream_running = False
+        self._stream_last_weight = None
+
+        # stream defaults
+        self._stream_stable_only = False
+        self._stream_hysteresis = 0.0
+        self._stream_poll_interval = 0.0
+
     def __del__(self):
         try:
             self._ser.close()
@@ -172,53 +183,6 @@ class AanddReader:
     #         self._logger.error(f"**Error**: {e}")
     #         return ""
 
-    def _stream(
-        self,
-    ) -> Union[float, Optional[bool]]:
-        """
-        ストリームデータを1行読む
-
-        1/10d
-        sample
-
-        1. 長押し(2sec)
-        2. bASFnc (分類項目) 1/10d 押すたびに変わる
-           ...
-
-        オートプリントモードA 設定
-        --> dout
-        --> Prt
-        --> Prt 1  (一回目を押したら、Aモード(1)に変更
-
-        """
-        if self._ser is None:
-            self._logger.error("Serial port is not opened.")
-            return False
-
-        try:
-            line = self._ser.readline()
-        except Exception as e:
-            self._logger.error(f"**Error**: {e}")
-            return False
-
-        if not line:
-            self._logger.error("No data received.")
-            return False
-
-        # 例: b'ST,+0000.000  g\r\n'
-        line = line.rstrip()
-
-        # 長さチェックは「厳密に固定しない」
-        # フォーマット前提で切る
-        try:
-            self._status = str(line[0:2].decode())
-            self._weight = float(line[3:12].decode())
-            self._unit = str(line[12:15].decode().strip())
-        except Exception:
-            return False
-
-        return self._weight
-
     def _r(
         self,
     ) -> Union[str, bool]:
@@ -319,6 +283,229 @@ class AanddReader:
             return False
 
         return self._weight
+
+    # ------------------------------------------
+    # Stream API
+    # ------------------------------------------
+
+    def set_stream_stable_only(self, val: bool) -> None:
+        """ストリーム時に ST のみ扱うかを設定する。"""
+        self._stream_stable_only = bool(val)
+
+    def get_stream_stable_only(self) -> bool:
+        """ストリーム時に ST のみ扱うかを返す。"""
+        return self._stream_stable_only
+
+    def set_stream_hysteresis(self, val: float) -> None:
+        """閾値イベントのヒステリシス幅を設定する。"""
+        self._stream_hysteresis = float(val)
+
+    def get_stream_hysteresis(self) -> float:
+        """閾値イベントのヒステリシス幅を返す。"""
+        return self._stream_hysteresis
+
+    def set_stream_poll_interval(self, val: float) -> None:
+        """ストリームループの待機秒数を設定する。"""
+        self._stream_poll_interval = float(val)
+
+    def get_stream_poll_interval(self) -> float:
+        """ストリームループの待機秒数を返す。"""
+        return self._stream_poll_interval
+
+    def _stream(
+        self,
+    ) -> Union[float, Optional[bool]]:
+        """
+        ストリームデータを1行読む
+
+        1/10d
+        sample
+
+        1. 長押し(2sec)
+        2. bASFnc (分類項目) 1/10d 押すたびに変わる
+           ...
+
+        オートプリントモードA 設定
+        --> dout
+        --> Prt
+        --> Prt 1  (一回目を押したら、Aモード(1)に変更
+
+        """
+        if self._ser is None:
+            self._logger.error("Serial port is not opened.")
+            return False
+
+        try:
+            line = self._ser.readline()
+        except Exception as e:
+            self._logger.error(f"**Error**: {e}")
+            return False
+
+        if not line:
+            self._logger.error("No data received.")
+            return False
+
+        # 例: b'ST,+0000.000  g\r\n'
+        line = line.rstrip()
+
+        # 長さチェックは「厳密に固定しない」
+        # フォーマット前提で切る
+        try:
+            self._status = str(line[0:2].decode())
+            self._weight = float(line[3:12].decode())
+            self._unit = str(line[12:15].decode().strip())
+        except Exception:
+            return False
+
+        return self._weight
+
+    def start_stream(
+        self,
+        on_sample: Optional[Callable[[float, str, str], None]] = None,
+        threshold: Optional[float] = None,
+        on_threshold: Optional[Callable[[float, str, str], None]] = None,
+        stable_only: Optional[bool] = None,
+        hysteresis: Optional[float] = None,
+        poll_interval: Optional[float] = None,
+    ) -> bool:
+        """バックグラウンドでストリーム計測を開始する。
+
+        Args:
+            on_sample: 毎サンプルで呼ばれるコールバック。
+                引数は (weight, status, unit)。
+            threshold: 閾値。None の場合は閾値イベントを使わない。
+            on_threshold: 重量が閾値を下→上に跨いだ時に呼ぶコールバック。
+            stable_only: True の場合、status が "ST" のみ扱う。
+            hysteresis: チャタリング防止用。閾値を下回る復帰点を
+                (threshold - hysteresis) とする。
+            poll_interval: ループ毎の待機秒数。0 の場合は readline 待ち。
+
+        Returns:
+            開始できた場合 True（すでに動作中でも True）、失敗時 False。
+        """
+        if self._ser is None:
+            self._logger.error("Serial port is not opened.")
+            return False
+
+        if stable_only is None:
+            stable_only = self._stream_stable_only
+        if hysteresis is None:
+            hysteresis = self._stream_hysteresis
+        if poll_interval is None:
+            poll_interval = self._stream_poll_interval
+
+        if self._stream_running:
+            self._logger.error("Stream already running.")
+            return False
+
+        self._stream_stop.clear()
+        self._stream_running = True
+        self._stream_thread = threading.Thread(
+            target=self._stream_loop,
+            args=(
+                on_sample,
+                threshold,
+                on_threshold,
+                stable_only,
+                hysteresis,
+                poll_interval,
+            ),
+            daemon=True,
+        )
+        self._stream_thread.start()
+        return True
+
+    def stop_stream(self, join_timeout: float = 1.0) -> None:
+        """バックグラウンド計測を停止する。
+
+        Args:
+            join_timeout: スレッド終了待ちのタイムアウト秒数。
+        """
+        if not self._stream_running:
+            return
+        self._stream_stop.set()
+        if self._stream_thread is not None:
+            self._stream_thread.join(timeout=join_timeout)
+        self._stream_running = False
+
+    def is_streaming(self) -> bool:
+        """バックグラウンド計測が動作中かを返す。
+
+        Returns:
+            動作中なら True。
+        """
+        return self._stream_running
+
+    def _stream_loop(
+        self,
+        on_sample: Optional[Callable[[float, str, str], None]],
+        threshold: Optional[float],
+        on_threshold: Optional[Callable[[float, str, str], None]],
+        stable_only: bool,
+        hysteresis: float,
+        poll_interval: float,
+    ) -> None:
+        """バックグラウンド計測の内部ループ。
+
+        たとえば threshold=10.0 で hysteresis=0.2 の場合:
+
+        重さが 10.0g を超えた瞬間に1回発火
+        その後は 9.8g（=10.0-0.2）を下回るまで 再発火しない
+        9.8g を下回ったら「リセット状態」に戻る
+        再び 10.0g を超えたらまた1回発火
+
+        Args:
+            on_sample: 毎サンプルで呼ぶコールバック。
+            threshold: 閾値。
+            on_threshold: 閾値を跨いだときのコールバック。
+            stable_only: True の場合は "ST" のみ扱う。
+            hysteresis: チャタリング防止用の幅。
+            poll_interval: ループ毎の待機秒数。
+        """
+        last = None
+        last_over = False
+
+        while not self._stream_stop.is_set():
+            val = self._stream()
+            if val is False:
+                # 読めない時は少し待ってリトライ
+                time.sleep(0.05)
+                continue
+
+            # _stream() が値更新済みなので参照
+            weight = self._weight
+            status = self._status or ""
+            unit = self._unit or ""
+
+            if weight is None:
+                continue
+
+            if stable_only and status != "ST":
+                continue
+
+            if on_sample is not None:
+                try:
+                    on_sample(weight, status, unit)
+                except Exception as e:
+                    self._logger.error(f"**Error(on_sample)**: {e}")
+
+            if threshold is not None and on_threshold is not None:
+                over = weight >= threshold
+                # ヒステリシス: 一度overになったら (threshold - hysteresis) を下回るまで解除しない
+                if last_over:
+                    if weight <= (threshold - hysteresis):
+                        last_over = False
+                else:
+                    if over:
+                        last_over = True
+                        try:
+                            on_threshold(weight, status, unit)
+                        except Exception as e:
+                            self._logger.error(f"**Error(on_threshold)**: {e}")
+
+            # poll ループのインターバル
+            if poll_interval > 0:
+                time.sleep(poll_interval)
 
 
 if __name__ == "__main__":
