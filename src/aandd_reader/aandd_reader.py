@@ -40,8 +40,8 @@ class AanddReader:
         self._timeout = timeout or 0.5
         self._meas_mode = "Q"
 
-        self._status = None
-        self._unit = None
+        self._status: Optional[str] = None
+        self._unit: Optional[str] = None
         self._weight: Optional[float] = None
 
         self._logger.info(f"Create AandD Device (Serial)")
@@ -83,13 +83,13 @@ class AanddReader:
     def status(self):
         return self._status
 
-    def get_status(self):
+    def get_status(self) -> Optional[str]:
         return self._status
 
     def unit(self):
         return self._unit
 
-    def get_unit(self):
+    def get_unit(self) -> Optional[str]:
         return self._unit
 
     @staticmethod
@@ -234,9 +234,11 @@ class AanddReader:
         if len(line) == 17:
             line = line.rstrip()
             try:
-                self._status = line[0:2].decode()  # 測定状態(ST:安定)
-                self._weight = line[3:12].decode()
-                self._unit = line[12:15].decode().strip()
+                self._status: Optional[str] = str(
+                    line[0:2].decode()
+                )  # 測定状態(ST:安定)
+                self._weight: Optional[float] = float(line[3:12].decode())
+                self._unit: Optional[str] = str(line[12:15].decode().strip())
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
                 return False
@@ -273,9 +275,11 @@ class AanddReader:
         if len(line) == 17:
             line = line.rstrip()
             try:
-                self._status = str(line[0:2].decode())  # 測定状態(ST:安定)
-                self._weight = float(line[3:12].decode())
-                self._unit = str(line[12:15].decode().strip())
+                self._status: Optional[str] = str(
+                    line[0:2].decode()
+                )  # 測定状態(ST:安定)
+                self._weight: Optional[float] = float(line[3:12].decode())
+                self._unit: Optional[str] = str(line[12:15].decode().strip())
             except Exception as e:
                 self._logger.error(f"**Error(line==17)**: {e}")
                 return False
@@ -286,7 +290,7 @@ class AanddReader:
         return self._weight
 
     # ------------------------------------------
-    # Stream API
+    # Stream API (alpha版)
     # ------------------------------------------
 
     def set_stream_stable_only(self, val: bool) -> None:
@@ -352,9 +356,9 @@ class AanddReader:
         # 長さチェックは「厳密に固定しない」
         # フォーマット前提で切る
         try:
-            self._status = str(line[0:2].decode())
-            self._weight = float(line[3:12].decode())
-            self._unit = str(line[12:15].decode().strip())
+            self._status: Optional[str] = str(line[0:2].decode())
+            self._weight: Optional[float] = float(line[3:12].decode())
+            self._unit: Optional[str] = str(line[12:15].decode().strip())
         except Exception:
             return False
 
@@ -362,8 +366,8 @@ class AanddReader:
 
     def start_stream(
         self,
-        on_sample: Optional[Callable[[float, str, str], None]] = None,
         threshold: Optional[float] = None,
+        on_sample: Optional[Callable[[float, str, str], None]] = None,
         on_threshold: Optional[Callable[[float, str, str], None]] = None,
         stable_only: Optional[bool] = None,
         hysteresis: Optional[float] = None,
@@ -404,8 +408,8 @@ class AanddReader:
         self._stream_thread = threading.Thread(
             target=self._stream_loop,
             args=(
-                on_sample,
                 threshold,
+                on_sample,
                 on_threshold,
                 stable_only,
                 hysteresis,
@@ -439,9 +443,9 @@ class AanddReader:
 
     def _stream_loop(
         self,
-        on_sample: Optional[Callable[[float, str, str], None]],
         threshold: Optional[float],
-        on_threshold: Optional[Callable[[float, str, str], None]],
+        on_sample: Optional[Callable[[Optional[str], float, str], None]],
+        on_threshold: Optional[Callable[[Optional[str], float, str], None]],
         stable_only: bool,
         hysteresis: float,
         poll_interval: float,
@@ -456,8 +460,8 @@ class AanddReader:
         再び 10.0g を超えたらまた1回発火
 
         Args:
-            on_sample: 毎サンプルで呼ぶコールバック。
             threshold: 閾値。
+            on_sample: 毎サンプルで呼ぶコールバック(関数)
             on_threshold: 閾値を跨いだときのコールバック。
             stable_only: True の場合は "ST" のみ扱う。
             hysteresis: チャタリング防止用の幅。
@@ -474,9 +478,9 @@ class AanddReader:
                 continue
 
             # _stream() が値更新済みなので参照
-            weight = self._weight
-            status = self._status or ""
-            unit = self._unit or ""
+            status: Optional[str] = self._status or ""
+            weight: Optional[float] = self._weight
+            unit: Optional[str] = self._unit or ""
 
             if weight is None:
                 continue
@@ -486,7 +490,7 @@ class AanddReader:
 
             if on_sample is not None:
                 try:
-                    on_sample(weight, status, unit)
+                    on_sample(status, weight, unit)
                 except Exception as e:
                     self._logger.error(f"**Error(on_sample)**: {e}")
 
@@ -500,13 +504,61 @@ class AanddReader:
                     if over:
                         last_over = True
                         try:
-                            on_threshold(weight, status, unit)
+                            on_threshold(status, weight, unit)
                         except Exception as e:
                             self._logger.error(f"**Error(on_threshold)**: {e}")
 
             # poll ループのインターバル
             if poll_interval > 0:
                 time.sleep(poll_interval)
+
+    def wait_threshold(
+        self,
+        threshold: float,
+        stable_only: Optional[bool] = None,
+        hysteresis: Optional[float] = None,
+        timeout_sec: float = 10.0,
+    ) -> Tuple[bool, Optional[str], Optional[float], Optional[str]]:
+        """
+        閾値を超えるまで待って1回だけ返す。必ず返る。
+        サーバー側の long-pooling 用 method
+        """
+        if stable_only is None:
+            stable_only = self._stream_stable_only
+        if hysteresis is None:
+            hysteresis = self._stream_hysteresis
+
+        start = time.time()
+        last_over = False
+
+        while True:
+            if (time.time() - start) >= timeout_sec:
+                return False, self._status, self._weight, self._unit
+
+            val = self._stream()
+            if val is False:
+                time.sleep(0.05)
+                continue
+
+            status = self._status
+            weight = self._weight
+            unit = self._unit
+
+            if weight is None:
+                continue
+            if stable_only and status != "ST":
+                continue
+
+            over = weight >= threshold
+            if last_over:
+                if weight <= (threshold - hysteresis):
+                    last_over = False
+            else:
+                if over:
+                    return True, status, weight, unit
+
+        # 型チェッカー向けの最終 return（到達しない想定）
+        return False, self._status, self._weight, self._unit
 
 
 if __name__ == "__main__":

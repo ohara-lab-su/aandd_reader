@@ -23,3 +23,30 @@ class StreamStartRequest(BaseModel):
     stable_only: Optional[bool] = False
     hysteresis: Optional[float] = None
     poll_interval: Optional[float] = None
+
+
+# ---------------------------------
+# stream mode 機能(alpha版)
+# ---------------------------------
+
+
+class WaitThresholdRequest(BaseModel):
+    """
+    重さが閾値を超えた時に Server がからレスポンスするための method
+    """
+
+    threshold: float
+    stable_only: Optional[bool] = False
+    hysteresis: Optional[float] = None
+    timeout_sec: Optional[float] = None
+
+
+class ThresholdEventResponse(BaseModel):
+    """
+    重さが閾値を超えた時に Server がからレスポンスするための method
+    """
+
+    triggered: bool
+    weight: Optional[float]
+    status: Optional[str]
+    unit: Optional[str]
