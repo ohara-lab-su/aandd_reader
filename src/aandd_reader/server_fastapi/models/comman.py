@@ -19,9 +19,6 @@ class SetMeasModeRequest(BaseModel):
 
 
 class StreamStartRequest(BaseModel):
-    threshold: Optional[float] = None
-    stable_only: Optional[bool] = False
-    hysteresis: Optional[float] = None
     poll_interval: Optional[float] = None
 
 
@@ -30,23 +27,27 @@ class StreamStartRequest(BaseModel):
 # ---------------------------------
 
 
-class WaitThresholdRequest(BaseModel):
-    """
-    重さが閾値を超えた時に Server がからレスポンスするための method
-    """
-
+class WatchStartRequest(BaseModel):
     threshold: float
-    stable_only: Optional[bool] = False
-    hysteresis: Optional[float] = None
+    hysteresis: Optional[float] = 0.0
+
+
+class WatchStartResponse(BaseModel):
+    watch_id: str
+
+
+class WatchStopRequest(BaseModel):
+    watch_id: str
+
+
+class WaitEventRequest(BaseModel):
+    watch_id: str
     timeout_sec: Optional[float] = None
 
 
 class ThresholdEventResponse(BaseModel):
-    """
-    重さが閾値を超えた時に Server がからレスポンスするための method
-    """
-
     triggered: bool
+    event_id: Optional[int]
     weight: Optional[float]
     status: Optional[str]
     unit: Optional[str]

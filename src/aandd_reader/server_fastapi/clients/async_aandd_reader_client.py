@@ -8,11 +8,14 @@ import re
 import asyncio
 import nest_asyncio
 from pathlib import Path
-from typing import Union, Optional, Set, Callable, Tuple
+from typing import Union, Optional, Set, Callable, Tuple, Any
 
 from aandd_reader.config import Config
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
-from aandd_reader.server_fastapi.models.comman import ResultResponse
+from aandd_reader.server_fastapi.models.comman import (
+    ResultResponse,
+    ThresholdEventResponse,
+)
 
 from fastapi_frame.clients.async_device_client import AsyncDeviceClient
 
@@ -23,22 +26,31 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
         config: Config = None,
         server_ip: str = None,
         server_port: int = None,
-        logger=None,
+        logger: Any = None,
+        log_level: str = "INFO",
     ):
         """
         旧版との互換インターフェース（引数）を保ったまま
         AsyncDeviceClient に api_spec, base_url を自動設定して渡すラッパ
         """
+        if logger is None:
+            import logging
+
+            logging.basicConfig(level="INFO")
+            logger = logging.getLogger(__name__)
+
         if config is not None:
             server_ip = config.SERVER_IP
             server_port = config.SERVER_PORT
 
+        self._logger = logger
+
         base_url = f"http://{server_ip}:{server_port}"
         self._base_url = base_url
 
-        logger.info(f"[CLIENT] server_ip = {server_ip}")
-        logger.info(f"[CLIENT] server_port = {server_port}")
-        logger.info(f"[CLIENT] base_url = {base_url}")
+        self._logger.info(f"[CLIENT] server_ip = {server_ip}")
+        self._logger.info(f"[CLIENT] server_port = {server_port}")
+        self._logger.info(f"[CLIENT] base_url = {base_url}")
 
         super().__init__(
             server_ip=server_ip,
@@ -46,6 +58,7 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
             api_spec=aandd_reader_api_spec,
             base_url=base_url,
             logger=logger,
+            log_level=log_level,
         )
 
         self._threshold_task = None
@@ -95,49 +108,28 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
     # stream mode 機能(alpha版)
     # ---------------------------------
 
-    def _init_threshold_listener(self):
-        if not hasattr(self, "_threshold_task"):
-            self._threshold_task = None
-            self._threshold_stop = asyncio.Event()
+    async def start_watch_listener(
+        self, threshold: float, hysteresis: float, on_event, timeout_sec: float = 30.0
+    ):
+        res = await self.watch_start(threshold=threshold, hysteresis=hysteresis)
+        watch_id = res["watch_id"]
 
-    async def start_threshold_listener(
-        self,
-        threshold: float,
-        on_threshold: Callable[[Optional[str], Optional[float], Optional[str]], None],
-        stable_only: bool = False,
-        hysteresis: float = 0.0,
-        timeout_sec: float = 10.0,
-    ) -> None:
-        """wait_threshold の戻り値(タプル)を使って、閾値到達時にコールバックを呼ぶ。"""
-        self._init_threshold_listener()
-        if self._threshold_task and not self._threshold_task.done():
-            return
-
-        self._threshold_stop.clear()
+        self._watch_stop = asyncio.Event()
 
         async def _loop():
-            while not self._threshold_stop.is_set():
-                result: Tuple[bool, Optional[str], Optional[float], Optional[str]] = (
-                    await self.wait_threshold(
-                        threshold=threshold,
-                        stable_only=stable_only,
-                        hysteresis=hysteresis,
-                        timeout_sec=timeout_sec,
-                    )
-                )
-                triggered, status, weight, unit = result
-                if triggered:
-                    try:
-                        on_threshold(status, weight, unit)
-                    except Exception as e:
-                        if hasattr(self, "_logger") and self._logger:
-                            self._logger.error(f"**Error(on_threshold)**: {e}")
-                await asyncio.sleep(0.01)
+            while not self._watch_stop.is_set():
+                ev = await self.wait_event(watch_id=watch_id, timeout_sec=timeout_sec)
+                if ev and ev.get("triggered"):
+                    on_event(
+                        ev
+                    )  # ev["event_id"], ev["weight"], ev["status"], ev["unit"]
 
-        self._threshold_task = asyncio.create_task(_loop())
+        self._watch_task = asyncio.create_task(_loop())
+        return watch_id
 
-    async def stop_threshold_listener(self) -> None:
-        self._init_threshold_listener()
-        self._threshold_stop.set()
-        if self._threshold_task:
-            await self._threshold_task
+    async def stop_watch_listener(self, watch_id: str):
+        if hasattr(self, "_watch_stop"):
+            self._watch_stop.set()
+        if hasattr(self, "_watch_task"):
+            await self._watch_task
+        await self.watch_stop(watch_id=watch_id)

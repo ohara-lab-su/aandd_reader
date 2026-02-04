@@ -27,11 +27,14 @@ class AanddReader:
         baud_rate: Optional[int] = None,
         timeout: Optional[float] = None,
         logger: Optional[Any] = None,
+        log_level: str = "info",
     ):
+        # XLogger が存在しない時に仕方がないのでデフォルトの logging を使う
         if logger is None:
-            from x_logger import XLogger
+            import logging
 
-            logger = XLogger(log_level="info")
+            logging.basicConfig(level=log_level.upper())
+            logger = logging.getLogger(__name__)
 
         self._logger = logger
 
@@ -63,12 +66,12 @@ class AanddReader:
         self._stream_thread = None
         self._stream_stop = threading.Event()
         self._stream_running = False
-        self._stream_last_weight = None
 
         # stream defaults
-        self._stream_stable_only = False
-        self._stream_hysteresis = 0.0
         self._stream_poll_interval = 0.0
+
+        self._stream_update_id = 0
+        self._stream_update_cond = threading.Condition()
 
     def __del__(self):
         try:
@@ -80,17 +83,20 @@ class AanddReader:
     # Device Info API
     # ---------------------------
 
-    def status(self):
-        return self._status
+    # def status(self):
+    #     return self._status
 
     def get_status(self) -> Optional[str]:
         return self._status
 
-    def unit(self):
-        return self._unit
+    # def unit(self):
+    #     return self._unit
 
     def get_unit(self) -> Optional[str]:
         return self._unit
+
+    def get_weight(self) -> Optional[float]:
+        return self._weight
 
     @staticmethod
     def is_ack(data: bytes) -> bool:
@@ -293,22 +299,6 @@ class AanddReader:
     # Stream API (alpha版)
     # ------------------------------------------
 
-    def set_stream_stable_only(self, val: bool) -> None:
-        """ストリーム時に ST のみ扱うかを設定する。"""
-        self._stream_stable_only = bool(val)
-
-    def get_stream_stable_only(self) -> bool:
-        """ストリーム時に ST のみ扱うかを返す。"""
-        return self._stream_stable_only
-
-    def set_stream_hysteresis(self, val: float) -> None:
-        """閾値イベントのヒステリシス幅を設定する。"""
-        self._stream_hysteresis = float(val)
-
-    def get_stream_hysteresis(self) -> float:
-        """閾値イベントのヒステリシス幅を返す。"""
-        return self._stream_hysteresis
-
     def set_stream_poll_interval(self, val: float) -> None:
         """ストリームループの待機秒数を設定する。"""
         self._stream_poll_interval = float(val)
@@ -316,6 +306,20 @@ class AanddReader:
     def get_stream_poll_interval(self) -> float:
         """ストリームループの待機秒数を返す。"""
         return self._stream_poll_interval
+
+    def get_stream_update_condition(self) -> threading.Condition:
+        """
+        stream_loop の更新通知に使っている Condition を返す
+        （サーバー内部用）
+        """
+        return self._stream_update_cond
+
+    def get_stream_update_id(self) -> int:
+        """
+        stream_loop の更新カウンタを返す
+        （サーバー内部用）
+        """
+        return self._stream_update_id
 
     def _stream(
         self,
@@ -364,26 +368,14 @@ class AanddReader:
 
         return self._weight
 
-    def start_stream(
+    def stream_start(
         self,
-        threshold: Optional[float] = None,
-        on_sample: Optional[Callable[[float, str, str], None]] = None,
-        on_threshold: Optional[Callable[[float, str, str], None]] = None,
-        stable_only: Optional[bool] = None,
-        hysteresis: Optional[float] = None,
         poll_interval: Optional[float] = None,
     ) -> bool:
         """バックグラウンドでストリーム計測を開始する。
 
         Args:
-            on_sample: 毎サンプルで呼ばれるコールバック。
-                引数は (weight, status, unit)。
-            threshold: 閾値。None の場合は閾値イベントを使わない。
-            on_threshold: 重量が閾値を下→上に跨いだ時に呼ぶコールバック。
-            stable_only: True の場合、status が "ST" のみ扱う。
-            hysteresis: チャタリング防止用。閾値を下回る復帰点を
-                (threshold - hysteresis) とする。
-            poll_interval: ループ毎の待機秒数。0 の場合は readline 待ち。
+            poll_interval: ループ毎の待機秒数。 0 の場合は readline 待ち。
 
         Returns:
             開始できた場合 True（すでに動作中でも True）、失敗時 False。
@@ -392,10 +384,6 @@ class AanddReader:
             self._logger.error("Serial port is not opened.")
             return False
 
-        if stable_only is None:
-            stable_only = self._stream_stable_only
-        if hysteresis is None:
-            hysteresis = self._stream_hysteresis
         if poll_interval is None:
             poll_interval = self._stream_poll_interval
 
@@ -407,20 +395,13 @@ class AanddReader:
         self._stream_running = True
         self._stream_thread = threading.Thread(
             target=self._stream_loop,
-            args=(
-                threshold,
-                on_sample,
-                on_threshold,
-                stable_only,
-                hysteresis,
-                poll_interval,
-            ),
+            args=(poll_interval,),
             daemon=True,
         )
         self._stream_thread.start()
         return True
 
-    def stop_stream(self, join_timeout: float = 1.0) -> None:
+    def stream_stop(self, join_timeout: float = 1.0) -> None:
         """バックグラウンド計測を停止する。
 
         Args:
@@ -443,33 +424,13 @@ class AanddReader:
 
     def _stream_loop(
         self,
-        threshold: Optional[float],
-        on_sample: Optional[Callable[[Optional[str], float, str], None]],
-        on_threshold: Optional[Callable[[Optional[str], float, str], None]],
-        stable_only: bool,
-        hysteresis: float,
         poll_interval: float,
     ) -> None:
         """バックグラウンド計測の内部ループ。
-
-        たとえば threshold=10.0 で hysteresis=0.2 の場合:
-
-        重さが 10.0g を超えた瞬間に1回発火
-        その後は 9.8g（=10.0-0.2）を下回るまで 再発火しない
-        9.8g を下回ったら「リセット状態」に戻る
-        再び 10.0g を超えたらまた1回発火
-
         Args:
-            threshold: 閾値。
-            on_sample: 毎サンプルで呼ぶコールバック(関数)
-            on_threshold: 閾値を跨いだときのコールバック。
-            stable_only: True の場合は "ST" のみ扱う。
-            hysteresis: チャタリング防止用の幅。
             poll_interval: ループ毎の待機秒数。
         """
-        last = None
-        last_over = False
-
+        # loop で _stream() を実行する
         while not self._stream_stop.is_set():
             val = self._stream()
             if val is False:
@@ -477,88 +438,13 @@ class AanddReader:
                 time.sleep(0.05)
                 continue
 
-            # _stream() が値更新済みなので参照
-            status: Optional[str] = self._status or ""
-            weight: Optional[float] = self._weight
-            unit: Optional[str] = self._unit or ""
-
-            if weight is None:
-                continue
-
-            if stable_only and status != "ST":
-                continue
-
-            if on_sample is not None:
-                try:
-                    on_sample(status, weight, unit)
-                except Exception as e:
-                    self._logger.error(f"**Error(on_sample)**: {e}")
-
-            if threshold is not None and on_threshold is not None:
-                over = weight >= threshold
-                # ヒステリシス: 一度overになったら (threshold - hysteresis) を下回るまで解除しない
-                if last_over:
-                    if weight <= (threshold - hysteresis):
-                        last_over = False
-                else:
-                    if over:
-                        last_over = True
-                        try:
-                            on_threshold(status, weight, unit)
-                        except Exception as e:
-                            self._logger.error(f"**Error(on_threshold)**: {e}")
+            with self._stream_update_cond:
+                self._stream_update_id += 1
+                self._stream_update_cond.notify_all()
 
             # poll ループのインターバル
             if poll_interval > 0:
                 time.sleep(poll_interval)
-
-    def wait_threshold(
-        self,
-        threshold: float,
-        stable_only: Optional[bool] = None,
-        hysteresis: Optional[float] = None,
-        timeout_sec: float = 10.0,
-    ) -> Tuple[bool, Optional[str], Optional[float], Optional[str]]:
-        """
-        閾値を超えるまで待って1回だけ返す。必ず返る。
-        サーバー側の long-pooling 用 method
-        """
-        if stable_only is None:
-            stable_only = self._stream_stable_only
-        if hysteresis is None:
-            hysteresis = self._stream_hysteresis
-
-        start = time.time()
-        last_over = False
-
-        while True:
-            if (time.time() - start) >= timeout_sec:
-                return False, self._status, self._weight, self._unit
-
-            val = self._stream()
-            if val is False:
-                time.sleep(0.05)
-                continue
-
-            status = self._status
-            weight = self._weight
-            unit = self._unit
-
-            if weight is None:
-                continue
-            if stable_only and status != "ST":
-                continue
-
-            over = weight >= threshold
-            if last_over:
-                if weight <= (threshold - hysteresis):
-                    last_over = False
-            else:
-                if over:
-                    return True, status, weight, unit
-
-        # 型チェッカー向けの最終 return（到達しない想定）
-        return False, self._status, self._weight, self._unit
 
 
 if __name__ == "__main__":
