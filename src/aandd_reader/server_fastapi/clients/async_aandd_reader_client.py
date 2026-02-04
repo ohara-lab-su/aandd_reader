@@ -61,9 +61,6 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
             log_level=log_level,
         )
 
-        self._watch_stop = None
-        self._watch_task = None
-
     #
     # property style で一部メソッドを使えるようにする
     #
@@ -82,44 +79,6 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
             return loop.run_until_complete(coro)
         else:
             return asyncio.run(coro)
-
-    # ---------------------------------
-    # stream mode 機能(alpha版)
-    # ---------------------------------
-
-    async def start_watch_listener(
-        self, threshold: float, hysteresis: float, on_event, timeout_sec: float = 30.0
-    ):
-        res = await self.watch_start(
-            threshold=threshold,
-            hysteresis=hysteresis,
-        )
-        watch_id = res["watch_id"]
-
-        # self._watch_stop = asyncio.Event()
-
-        async def _loop():
-            while not self._watch_stop.is_set():
-                ev = await self.wait_event(
-                    watch_id=watch_id,
-                    timeout_sec=timeout_sec,
-                )
-                if ev and ev.get("triggered"):
-                    on_event(
-                        ev
-                    )  # ev["event_id"], ev["weight"], ev["status"], ev["unit"]
-
-        self._watch_task = asyncio.create_task(_loop())
-        return watch_id
-
-    async def stop_watch_listener(self, watch_id: str):
-        if hasattr(self, "_watch_stop"):
-            self._watch_stop.set()
-        if hasattr(self, "_watch_task"):
-            await self._watch_task
-        await self.watch_stop(
-            watch_id=watch_id,
-        )
 
     # def __getattr__(self, name):
     #     m = re.match(r"^(P|F|I|IO)(\d+)$", name)
