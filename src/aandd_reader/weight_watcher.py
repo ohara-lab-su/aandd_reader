@@ -19,11 +19,9 @@ class _WatchState:
 class WeightWatcher:
     def __init__(self, ctrl: "AanddReader"):
         self._ctrl = ctrl
-        self._cond = ctrl.get_stream_update_condition()
-        self._event_id = 0
-        self._event_lock = threading.Lock()
 
-        self._over = False
+        # これは毎回呼び出す必要があるのでここでのインスタンス変数化はしない
+        # self._cond = self._ctrl.get_stream_update_condition()
 
         self._watches: Dict[str, _WatchState] = {}
         self._watches_lock = threading.Lock()
@@ -31,13 +29,16 @@ class WeightWatcher:
         self._thread = None
         self._stop = threading.Event()
 
-        self._global_event_id = 0
+        # 重さを測って、敷居を超えた回数
+        self._event_id = 0
 
     def watch_start(
         self,
+        *,
         threshold: float,
         hysteresis: float = 0.0,
     ) -> str:
+
         watch_id = uuid.uuid4().hex
         st = _WatchState(
             threshold=float(threshold),
@@ -55,6 +56,7 @@ class WeightWatcher:
 
     def watch_stop(
         self,
+        *,
         watch_id: str,
     ) -> bool:
         with self._watches_lock:
@@ -66,6 +68,7 @@ class WeightWatcher:
 
     def wait_event(
         self,
+        *,
         watch_id: str,
         timeout_sec: Optional[float] = None,
     ) -> Optional[dict]:
@@ -81,19 +84,16 @@ class WeightWatcher:
             return None
 
     def _next_event_id(self) -> int:
-        with self._event_lock:
-            self._event_id += 1
-            return self._event_id
-
-    def _next_global_event_id(self) -> int:
-        self._global_event_id += 1
-        return self._global_event_id
+        """"""
+        self._event_id += 1
+        return self._event_id
 
     def _run(self) -> None:
+        """"""
         cond = self._ctrl.get_stream_update_condition()
 
         while not self._stop.is_set():
-            with cond:
+            with self._cond:
                 cond.wait(timeout=1.0)
 
             weight = self._ctrl.get_weight()
@@ -115,7 +115,7 @@ class WeightWatcher:
                 if weight >= st.threshold:
                     st.over = True
                     ev = {
-                        "event_id": self._next_global_event_id(),
+                        "event_id": self._next_event_id(),
                         "weight": weight,
                         "status": status,
                         "unit": unit,
