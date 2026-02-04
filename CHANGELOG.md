@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
+
+- `.pyi` が実装ファイルを隠す仕様により、
+  `AsyncAanddReaderClient` 側でオーバーライド・追加している
+  - `start_watch_listener`
+  - `stop_watch_listener`
+  などの **stream / watch 補助メソッドが存在しない扱いになる問題を修正**。
+
 ## 2026.02.03 v0.0.5, nakada
 
 alpha版(正式に使える形になってない)

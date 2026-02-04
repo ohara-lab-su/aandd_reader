@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+"""
+1.	API spec（FastAPI 側の定義）から機械的に pyi を生成
+2.	その pyi を後処理で「現実の Python クラス構造」に合わせて修正
+3.	router 側の pyi は従来どおり素直に生成
+
+味噌は
+pyi は「.py を上書きする仕様」であり、
+pyi に書いていない事実（継承・自前メソッド）は「存在しない」扱いになる
+
+つまり、継承したクラス(親クラスのpyi)が存在するが。
+その継承したclassをオーバーライトしている pyi はそのままでは機能しない
+
+生成後の pyi を現実のクラス構造に合わせて補正する必要がある
+つまり API spec に載っていない時前メソッドを pyi についか
+"""
 import os
 from contextlib import contextmanager
 
@@ -124,6 +139,8 @@ with chdir("clients"):
         async_mode=False,
     )
 
+    # 生成後の pyi を現実のクラス構造に合わせて補正する
+    # つまり API spec に載っていない時前メソッドを pyi についか
     _patch_pyi_inheritance_and_extras(
         filename="sync_aandd_reader_client.pyi",
         base_import_line="from fastapi_frame.clients.sync_device_client import SyncDeviceClient",

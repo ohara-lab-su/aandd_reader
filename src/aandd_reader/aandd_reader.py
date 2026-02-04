@@ -62,17 +62,6 @@ class AanddReader:
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
 
-        # stream / background mode
-        self._stream_thread = None
-        self._stream_stop = threading.Event()
-        self._stream_running = False
-
-        # stream defaults
-        self._stream_poll_interval = 0.0
-
-        self._stream_update_id = 0
-        self._stream_update_cond = threading.Condition()
-
     def __del__(self):
         try:
             self._ser.close()
@@ -295,32 +284,6 @@ class AanddReader:
 
         return self._weight
 
-    # ------------------------------------------
-    # Stream API (alpha版)
-    # ------------------------------------------
-
-    def set_stream_poll_interval(self, val: float) -> None:
-        """ストリームループの待機秒数を設定する。"""
-        self._stream_poll_interval = float(val)
-
-    def get_stream_poll_interval(self) -> float:
-        """ストリームループの待機秒数を返す。"""
-        return self._stream_poll_interval
-
-    def get_stream_update_condition(self) -> threading.Condition:
-        """
-        stream_loop の更新通知に使っている Condition を返す
-        （サーバー内部用）
-        """
-        return self._stream_update_cond
-
-    def get_stream_update_id(self) -> int:
-        """
-        stream_loop の更新カウンタを返す
-        （サーバー内部用）
-        """
-        return self._stream_update_id
-
     def _stream(
         self,
     ) -> Union[float, Optional[bool]]:
@@ -367,84 +330,6 @@ class AanddReader:
             return False
 
         return self._weight
-
-    def stream_start(
-        self,
-        poll_interval: Optional[float] = None,
-    ) -> bool:
-        """バックグラウンドでストリーム計測を開始する。
-
-        Args:
-            poll_interval: ループ毎の待機秒数。 0 の場合は readline 待ち。
-
-        Returns:
-            開始できた場合 True（すでに動作中でも True）、失敗時 False。
-        """
-        if self._ser is None:
-            self._logger.error("Serial port is not opened.")
-            return False
-
-        if poll_interval is None:
-            poll_interval = self._stream_poll_interval
-
-        if self._stream_running:
-            self._logger.error("Stream already running.")
-            return False
-
-        self._stream_stop.clear()
-        self._stream_running = True
-        self._stream_thread = threading.Thread(
-            target=self._stream_loop,
-            args=(poll_interval,),
-            daemon=True,
-        )
-        self._stream_thread.start()
-        return True
-
-    def stream_stop(self, join_timeout: float = 1.0) -> None:
-        """バックグラウンド計測を停止する。
-
-        Args:
-            join_timeout: スレッド終了待ちのタイムアウト秒数。
-        """
-        if not self._stream_running:
-            return
-        self._stream_stop.set()
-        if self._stream_thread is not None:
-            self._stream_thread.join(timeout=join_timeout)
-        self._stream_running = False
-
-    def is_streaming(self) -> bool:
-        """バックグラウンド計測が動作中かを返す。
-
-        Returns:
-            動作中なら True。
-        """
-        return self._stream_running
-
-    def _stream_loop(
-        self,
-        poll_interval: float,
-    ) -> None:
-        """バックグラウンド計測の内部ループ。
-        Args:
-            poll_interval: ループ毎の待機秒数。
-        """
-        # loop で _stream() を実行する
-        while not self._stream_stop.is_set():
-            val = self._stream()
-            if val is False:
-                # 読めない時は少し待ってリトライ
-                time.sleep(0.05)
-                continue
-
-            with self._stream_update_cond:
-                self._stream_update_id += 1
-                self._stream_update_cond.notify_all()
-
-            # poll ループのインターバル
-            if poll_interval > 0:
-                time.sleep(poll_interval)
 
 
 if __name__ == "__main__":
