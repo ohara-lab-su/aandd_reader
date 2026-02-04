@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from aandd_reader.server_fastapi.models.comman import ResultResponse, SetMeasModeRequest, StreamStartRequest, ThresholdEventResponse, WaitThresholdRequest
+from aandd_reader.server_fastapi.models.comman import ResultResponse, SetMeasModeRequest, StreamStartRequest, ThresholdEventResponse, WaitEventRequest, WatchStartRequest, WatchStartResponse, WatchStopRequest
 from x_logger.x_logger import XLogger
 from fastapi import APIRouter
 class AanddReaderRouter:
@@ -42,10 +42,16 @@ class AanddReaderRouter:
     async def set_meas_mode(self, request: Optional[SetMeasModeRequest | str] = None) -> Any: ...
     # start_stream
     # バックグラウンドでストリーム計測開始
-    async def stream_start(self, request: Optional[StreamStartRequest | Optional | Optional | Optional | Optional] = None) -> Any: ...
+    async def stream_start(self, request: Optional[StreamStartRequest | Optional] = None) -> Any: ...
     # stop_stream
     # ストリーム計測停止
     async def stream_stop(self) -> Any: ...
-    # wait_threshold
-    # 閾値を超えるまで待機して1回だけ返す
-    async def wait_threshold(self, request: Optional[WaitThresholdRequest | float | Optional | Optional | Optional] = None) -> Any: ...
+    # watch_start
+    # watch を開始（threshold/hysteresis）
+    async def watch_start(self, request: Optional[WatchStartRequest | float | Optional] = None) -> Any: ...
+    # watch_stop
+    # watch を停止
+    async def watch_stop(self, request: Optional[WatchStopRequest | str] = None) -> Any: ...
+    # wait_event
+    # watch のイベントを long-poll で待つ
+    async def wait_event(self, request: Optional[WaitEventRequest | str | Optional] = None) -> Any: ...

@@ -11,8 +11,11 @@ from aandd_reader.server_fastapi.models.comman import (
     ResultResponse,
     SetMeasModeRequest,
     StreamStartRequest,
-    WaitThresholdRequest,
     ThresholdEventResponse,
+    WatchStartRequest,
+    WatchStartResponse,
+    WatchStopRequest,
+    WaitEventRequest,
 )
 
 # ここで「APIの数だけ」ApiSpecを作る
@@ -104,12 +107,30 @@ aandd_reader_api_spec = [
         description="ストリーム計測停止",
     ),
     ApiSpec(
-        name="wait_threshold",
+        name="watch_start",
         object_name="aandd",
-        request_model=WaitThresholdRequest,
+        request_model=WatchStartRequest,
+        response_model=WatchStartResponse,
+        method="post",
+        summary="watch_start",
+        description="watch を開始（threshold/hysteresis）",
+    ),
+    ApiSpec(
+        name="watch_stop",
+        object_name="aandd",
+        request_model=WatchStopRequest,
+        response_model=ResultResponse,
+        method="post",
+        summary="watch_stop",
+        description="watch を停止",
+    ),
+    ApiSpec(
+        name="wait_event",
+        object_name="aandd",
+        request_model=WaitEventRequest,
         response_model=ThresholdEventResponse,
         method="post",
-        summary="wait_threshold",
-        description="閾値を超えるまで待機して1回だけ返す",
+        summary="wait_event",
+        description="watch のイベントを long-poll で待つ",
     ),
 ]
