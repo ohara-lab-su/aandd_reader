@@ -28,16 +28,16 @@ if __name__ == "__main__":
     )
     logger.info(f"log_mode = {logger.log_mode}")
     logger.info(f"log_name = {logger.log_name}")
-    logger.info(f"PORT = {Config.PORT}")
+    logger.info(f"PORT = {Config.DEVICE_PORT}")
 
     server = FastApiServer(
         device_cls=AanddReader,  # 制御クラス
         router_cls=AanddReaderRouter,  # routerクラス
         config=Config,
         api_spec=aandd_reader_api_spec,
-        device_kwargs={"port": Config.PORT},  # COBOTTA制御Classのコンストラクタ引数)
+        device_kwargs={"port": Config.DEVICE_PORT},  # COBOTTA制御Classのコンストラクタ引数)
         logger=logger,
         logger_name=Config.SERVER_LOGGER_NAME,  # LOGGER_NAME
         lifespan_msg_prefix="AANDD",
     )
-    server.run(host=Config.SERVER_IP, port=Config.SERVER_PORT)
+    server.run(host=Config.SERVER_IP, port=Config.FASTAPI_PORT)

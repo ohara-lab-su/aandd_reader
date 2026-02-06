@@ -61,6 +61,7 @@ class AanddReader:
             )
         except Exception as e:
             self._logger.error(f"**Error**: {e}")
+            sys.exit(1)
 
     def __del__(self):
         try:
@@ -72,14 +73,14 @@ class AanddReader:
     # Device Info API
     # ---------------------------
 
-    # def status(self):
-    #     return self._status
+    def status(self):
+        return self._status
 
     def get_status(self) -> Optional[str]:
         return self._status
 
-    # def unit(self):
-    #     return self._unit
+    def unit(self):
+        return self._unit
 
     def get_unit(self) -> Optional[str]:
         return self._unit
@@ -153,6 +154,8 @@ class AanddReader:
         if mode is None:
             mode = self._meas_mode
 
+        self._logger.debug(f"[Meas] mode = {mode}")
+
         if mode.upper() == "Q":
             return self._q()
         elif mode.upper() == "S":
@@ -163,21 +166,6 @@ class AanddReader:
     # ---------------------------------
     # Device Ctrl Driver
     # ---------------------------------
-
-    # def cal(self):
-    #     """キャリブレーション(零点のリセットじゃないし、そもそも、このコマンドだけだと機能しない)"""
-    #     self._logger.info(f"[CAL]")
-    #     self._ser.reset_input_buffer()
-
-    #     try:
-    #         self._ser.write(b"CAL\r\n")
-    #         line = self._ser.readline().rstrip()
-    #         if not self.is_ack(line):
-    #             self._logger.error(f"ACK is False")
-
-    #     except Exception as e:
-    #         self._logger.error(f"**Error**: {e}")
-    #         return ""
 
     def _r(
         self,
@@ -236,6 +224,7 @@ class AanddReader:
                 self._unit: Optional[str] = str(line[12:15].decode().strip())
             except Exception as e:
                 self._logger.error(f"**Error**: {e}")
+                self._logger.error(f"line: {line}")
                 return False
         else:
             self._logger.error(line)
@@ -277,9 +266,11 @@ class AanddReader:
                 self._unit: Optional[str] = str(line[12:15].decode().strip())
             except Exception as e:
                 self._logger.error(f"**Error(line==17)**: {e}")
+                self._logger.error(f"line: {line}")
                 return False
         else:
             self._logger.error(f"**Error(len(line)!=17)**: {line}")
+            self._logger.error(f"line: {line}")
             return False
 
         return self._weight
@@ -333,10 +324,22 @@ class AanddReader:
 
 
 if __name__ == "__main__":
-    logger_ = XLogger(log_level="info")
-    aandd_reader = AanddReader(port="COM3", logger=logger_, log_level="info")
+    from x_logger import XLogger
+
+    # log_level_ = "info"
+    log_level_ = "debug"
+    logger_ = XLogger(
+        log_level=log_level_,
+        logger_name="AandDReader",
+    )
+
+    aandd_reader = AanddReader(
+        port="COM3",
+        logger=logger_,
+        log_level=log_level_,
+    )
     # aandd_reader.cal()
-    print(aandd_reader.get_serial_number())
-    print(aandd_reader.meas())
-    print(aandd_reader.status())
-    print(aandd_reader.unit())
+    logger_.info(f"SN: {aandd_reader.get_serial_number()}")
+    logger_.info(aandd_reader.meas())
+    # print(aandd_reader.status())
+    # print(aandd_reader.unit())

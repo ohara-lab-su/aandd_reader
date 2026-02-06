@@ -21,7 +21,8 @@ if __name__ == "__main__":
         logger_name="aandd_reader",
     )
 
-    aandd_reader = AanddReader(port="COM4", logger=logger)
+    #aandd_reader = AanddReader(port="COM4", logger=logger)
+    aandd_reader = AanddReader(port="COM3", logger=logger)
 
     # Reset
     aandd_reader.reset()
