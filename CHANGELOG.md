@@ -1,6 +1,15 @@
 # CHANGELOG
 
-## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
+## 2026.02.04 v0.1.0, nakada, (gRPC 利用モードの実装)
+
+- stream未テスト,watch 昨日は削除済み
+- new pyi 作成はテスト済み
+
+gRPC frame の joypad 以外の利用
+
+- 基本利用: テストOK
+- event は gRPC を用いて再度実装やり直し中
+ 
 ## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
 
 - `.pyi` が実装ファイルを隠す仕様により、
