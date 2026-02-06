@@ -254,6 +254,9 @@ class AanddReader:
         if b"EC,E02" in line:
             # 計測時間が短くて前回の命令動作を本体足しているときなど
             self._logger.error(f"**Error(EC, E02)**: {line}")
+            self._logger.error(
+                f"計測時間が短くて前回の命令動作を本体足している可能性があります"
+            )
             return False
 
         if len(line) == 17:
@@ -334,12 +337,14 @@ if __name__ == "__main__":
     )
 
     aandd_reader = AanddReader(
-        port="COM3",
+        # port="COM3",
+        port="COM4",
         logger=logger_,
         log_level=log_level_,
     )
     # aandd_reader.cal()
     logger_.info(f"SN: {aandd_reader.get_serial_number()}")
+    time.sleep(0.5)
     logger_.info(aandd_reader.meas())
     # print(aandd_reader.status())
     # print(aandd_reader.unit())
