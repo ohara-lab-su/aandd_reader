@@ -17,7 +17,11 @@ from grpc import channel_ready_future
 # --- gRPC-frame (new: ctrl.Control/Describe, ctrl.Control/Call) ---
 # import grpc_frame.ctrl_pb2 as ctrl_pb2
 import grpc_frame.ctrl_pb2_grpc as ctrl_pb2_grpc
+from grpc_frame.grpc_client import GrpcClient
 from grpc_frame.grpc_server import _ControlServicer
+
+from aandd_reader.aandd_reader import AanddReader
+
 from x_logger.x_logger import XLogger
 
 
@@ -25,9 +29,11 @@ from x_logger.x_logger import XLogger
 # Servicer クラス を用いた、server の起動
 # ============================================================
 def aandd_reader_server(
-    port: str,
-    logger: Optional[Any] = None,
-    log_level: str = "INFO",
+        device_port: str,
+        grpc_host: str,
+        grpc_port: int,
+        logger: Optional[Any] = None,
+        log_level: str = "INFO",
 ) -> None:
     """ """
     # XLogger が存在しない時に仕方がないのでデフォルトの logging を使う
@@ -66,7 +72,7 @@ def aandd_reader_server(
     logger.info("gRPC self-check OK")
 
     ctrl = AanddReader(
-        port="COM3",
+        port=device_port,
         logger=logger,
         log_level=log_level,
     )
@@ -98,13 +104,17 @@ def aandd_reader_server(
 # main
 # ------------------------------------------------------------
 if __name__ == "__main__":
-    PORT = "COM3"
+    DEVICE_PORT = "COM3"
+    GRPC_HOST = "10.170.10.38"
+    GRPC_PORT = 50051
     LOG_LEVEL = "INFO"
 
     LOGGER = XLogger(log_level=LOG_LEVEL, logger_name="JoypadServer")
 
     aandd_reader_server(
-        port=PORT,
+        device_port=DEVICE_PORT,
+        grpc_host=GRPC_HOST,
+        grpc_port=GRPC_PORT,
         logger=LOGGER,
         log_level=LOG_LEVEL,
     )
