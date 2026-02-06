@@ -333,8 +333,8 @@ class AanddReader:
 
 
 if __name__ == "__main__":
-    _logger = XLogger(log_level="info")
-    aandd_reader = AanddReader(port="COM3", logger=_logger)
+    logger_ = XLogger(log_level="info")
+    aandd_reader = AanddReader(port="COM3", logger=logger_, log_level="info")
     # aandd_reader.cal()
     print(aandd_reader.get_serial_number())
     print(aandd_reader.meas())
