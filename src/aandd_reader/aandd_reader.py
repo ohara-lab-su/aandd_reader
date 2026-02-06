@@ -273,6 +273,10 @@ class AanddReader:
                 return False
         else:
             self._logger.error(f"**Error(len(line)!=17)**: {line}")
+            self._logger.error(
+                f"返信メッセージが正しくない可能性があります。たとえば「空」の可能性です"
+            )
+            self._logger.error(f"計測モードなどのパラメーターを疑ってください")
             self._logger.error(f"line: {line}")
             return False
 
@@ -337,8 +341,8 @@ if __name__ == "__main__":
     )
 
     aandd_reader = AanddReader(
-        # port="COM3",
-        port="COM4",
+        port="COM3",
+        # port="COM4",
         logger=logger_,
         log_level=log_level_,
     )
