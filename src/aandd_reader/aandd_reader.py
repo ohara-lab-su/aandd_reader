@@ -63,6 +63,20 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             sys.exit(1)
 
+        # ----------------------------------
+        # gRPC 利用を意識
+        # _stream で得た値が式意図を超えたときの結果によってevent発生
+        self._event_bus = None
+
+        self._stream_thread = None
+        self._stream_stop_event = threading.Event()
+
+        self._event_topic = None
+        self._event_threshold_g = None
+        self._event_once = True
+        self._event_armed = False
+        # ----------------------------------
+
     def __del__(self):
         try:
             self._ser.close()
@@ -328,6 +342,118 @@ class AanddReader:
             return False
 
         return self._weight
+
+    # ----------------------------
+    # for Event
+    # ----------------------------
+
+    def _set_event_bus(self, event_bus) -> None:
+        with self._lock:
+            self._event_bus = event_bus
+
+    def event_arm(
+        self,
+        *,
+        topic: str,
+        threshold_g: float,
+        once: bool = True,
+    ) -> bool:
+        with self._lock:
+            self._event_topic = topic
+            self._event_threshold_g = float(threshold_g)
+            self._event_once = bool(once)
+            self._event_armed = True
+        return True
+
+    def stream_start(self) -> bool:
+        with self._lock:
+            thread_obj = self._stream_thread
+            if thread_obj is not None:
+                if thread_obj.is_alive():
+                    return True
+
+            self._stream_stop_event.clear()
+
+            self._stream_thread = threading.Thread(
+                target=self._stream_loop,
+                name="AanddReaderStream",
+                daemon=True,
+            )
+            self._stream_thread.start()
+        return True
+
+    def stream_stop(self) -> bool:
+        with self._lock:
+            self._stream_stop_event.set()
+
+        thread_obj = None
+        with self._lock:
+            thread_obj = self._stream_thread
+
+        if thread_obj is not None:
+            try:
+                thread_obj.join(timeout=2.0)
+            except Exception:
+                pass
+
+        with self._lock:
+            self._stream_thread = None
+
+        return True
+
+    def _stream_loop(self) -> None:
+        while True:
+            if self._stream_stop_event.is_set():
+                return
+
+            try:
+                weight_str = self._stream()
+            except Exception:
+                time.sleep(0.05)
+                continue
+
+            try:
+                weight_g, _unit = self._extract_weight(weight_str)
+                weight_val = float(weight_g)
+            except Exception:
+                continue
+
+            event_bus = None
+            topic = None
+            threshold_g = None
+            armed = False
+            once = True
+
+            with self._lock:
+                event_bus = self._event_bus
+                topic = self._event_topic
+                threshold_g = self._event_threshold_g
+                armed = bool(self._event_armed)
+                once = bool(self._event_once)
+
+            if event_bus is None:
+                continue
+            if armed is False:
+                continue
+            if topic is None:
+                continue
+            if threshold_g is None:
+                continue
+
+            if weight_val >= float(threshold_g):
+                payload = {
+                    "weight_g": weight_val,
+                    "threshold_g": float(threshold_g),
+                }
+
+                try:
+                    event_bus.publish(topic, payload)
+                except Exception:
+                    pass
+
+                if once:
+                    with self._lock:
+                        self._event_armed = False
 
 
 if __name__ == "__main__":
