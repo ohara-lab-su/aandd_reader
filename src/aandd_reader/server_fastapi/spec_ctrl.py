@@ -10,12 +10,6 @@ from fastapi_frame.models.api_spec import ApiSpec
 from aandd_reader.server_fastapi.models.comman import (
     ResultResponse,
     SetMeasModeRequest,
-    StreamStartRequest,
-    ThresholdEventResponse,
-    WatchStartRequest,
-    WatchStartResponse,
-    WatchStopRequest,
-    WaitEventRequest,
 )
 
 # ここで「APIの数だけ」ApiSpecを作る

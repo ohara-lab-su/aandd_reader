@@ -8,8 +8,6 @@ import re
 from typing import Union, Optional, Set, Any
 from pathlib import Path
 
-from aandd_reader.weight_watcher import WeightWatcher
-
 from fastapi_frame.routers.device_router import DeviceRouter
 from x_logger.x_logger import XLogger
 
