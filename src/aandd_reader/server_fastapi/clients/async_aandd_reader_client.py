@@ -8,11 +8,15 @@ import re
 import asyncio
 import nest_asyncio
 from pathlib import Path
-from typing import Union, Optional, Set
+from typing import Union, Optional, Set, Callable, Tuple, Any
 
 from aandd_reader.config import Config
-from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
-from aandd_reader.server_fastapi.models.comman import ResultResponse
+from aandd_reader.server_fastapi.spec_ctrl import (
+    aandd_reader_api_spec,
+)
+from aandd_reader.server_fastapi.models.comman import (
+    ResultResponse,
+)
 
 from fastapi_frame.clients.async_device_client import AsyncDeviceClient
 
@@ -23,22 +27,31 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
         config: Config = None,
         server_ip: str = None,
         server_port: int = None,
-        logger=None,
+        logger: Any = None,
+        log_level: str = "INFO",
     ):
         """
         旧版との互換インターフェース（引数）を保ったまま
         AsyncDeviceClient に api_spec, base_url を自動設定して渡すラッパ
         """
+        if logger is None:
+            import logging
+
+            logging.basicConfig(level="INFO")
+            logger = logging.getLogger(__name__)
+
         if config is not None:
             server_ip = config.SERVER_IP
-            server_port = config.SERVER_PORT
+            server_port = config.FASTAPI_PORT
+
+        self._logger = logger
 
         base_url = f"http://{server_ip}:{server_port}"
         self._base_url = base_url
 
-        logger.info(f"[CLIENT] server_ip = {server_ip}")
-        logger.info(f"[CLIENT] server_port = {server_port}")
-        logger.info(f"[CLIENT] base_url = {base_url}")
+        self._logger.info(f"[CLIENT] server_ip = {server_ip}")
+        self._logger.info(f"[CLIENT] server_port = {server_port}")
+        self._logger.info(f"[CLIENT] base_url = {base_url}")
 
         super().__init__(
             server_ip=server_ip,
@@ -46,6 +59,7 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
             api_spec=aandd_reader_api_spec,
             base_url=base_url,
             logger=logger,
+            log_level=log_level,
         )
 
     #

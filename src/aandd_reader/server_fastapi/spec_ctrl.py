@@ -7,7 +7,10 @@ kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 from fastapi_frame.models.api_spec import ApiSpec
 
 # SPEC
-from aandd_reader.server_fastapi.models.comman import ResultResponse
+from aandd_reader.server_fastapi.models.comman import (
+    ResultResponse,
+    SetMeasModeRequest,
+)
 
 # ここで「APIの数だけ」ApiSpecを作る
 aandd_reader_api_spec = [
@@ -57,5 +60,23 @@ aandd_reader_api_spec = [
         method="post",
         summary="measure_single",
         description="計測(status,unit)",
+    ),
+    ApiSpec(
+        name="get_meas_mode",
+        object_name="aandd",
+        request_model=None,
+        response_model=ResultResponse,
+        method="post",
+        summary="get_meas_mode",
+        description="measのモードを取得",
+    ),
+    ApiSpec(
+        name="set_meas_mode",
+        object_name="aandd",
+        request_model=SetMeasModeRequest,
+        response_model=ResultResponse,
+        method="post",
+        summary="set_meas_mode",
+        description="measのモードを設定 (Q/S)",
     ),
 ]

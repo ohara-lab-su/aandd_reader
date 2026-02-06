@@ -4,6 +4,8 @@ Kengo NAKADA:
 https://github.com/shimane-dev, https://github.com/kengo-nakada
 kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 """
+from pathlib import Path
+
 from aandd_reader.config import Config
 from aandd_reader.aandd_reader import AanddReader
 from aandd_reader.server_fastapi.routers import AanddReaderRouter
@@ -14,7 +16,9 @@ from x_logger.x_logger import XLogger
 
 
 if __name__ == "__main__":
-    Config.load_yaml("config_server.yaml")
+    HERE = Path(__file__).parent
+
+    Config.load_yaml(HERE / "config_server1.yaml")
     logger = XLogger(
         log_level="debug",
         logger_name=Config.SERVER_LOGGER_NAME,
@@ -24,16 +28,16 @@ if __name__ == "__main__":
     )
     logger.info(f"log_mode = {logger.log_mode}")
     logger.info(f"log_name = {logger.log_name}")
-    logger.info(f"PORT = {Config.PORT}")
+    logger.info(f"PORT = {Config.DEVICE_PORT}")
 
     server = FastApiServer(
         device_cls=AanddReader,  # 制御クラス
         router_cls=AanddReaderRouter,  # routerクラス
         config=Config,
         api_spec=aandd_reader_api_spec,
-        device_kwargs={"port": Config.PORT},  # COBOTTA制御Classのコンストラクタ引数)
+        device_kwargs={"port": Config.DEVICE_PORT},  # COBOTTA制御Classのコンストラクタ引数)
         logger=logger,
         logger_name=Config.SERVER_LOGGER_NAME,  # LOGGER_NAME
         lifespan_msg_prefix="AANDD",
     )
-    server.run(host=Config.SERVER_IP, port=Config.SERVER_PORT)
+    server.run(host=Config.SERVER_IP, port=Config.FASTAPI_PORT)
