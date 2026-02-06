@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
+## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
 
 - `.pyi` が実装ファイルを隠す仕様により、
   `AsyncAanddReaderClient` 側でオーバーライド・追加している

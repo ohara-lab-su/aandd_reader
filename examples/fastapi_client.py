@@ -12,6 +12,7 @@ import asyncio
 # async def test_fastapi_async_meas():
 async def main():
     import logging
+    from pathlib import Path
 
     # httpx のログを WARNING レベル以上にする（INFO を抑制）
     logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -20,7 +21,8 @@ async def main():
     from aandd_reader import AsyncAanddReaderClient
     from x_logger import XLogger
 
-    Config.load_yaml("config_server.yaml")
+    HERE = Path(__file__).parent
+    Config.load_yaml("config_server1.yaml")
 
     logger = XLogger(log_level="info", logger_name=Config.CLIENT_LOGGER_NAME)
     client = AsyncAanddReaderClient(config=Config, logger=logger)

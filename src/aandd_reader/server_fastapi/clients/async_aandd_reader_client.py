@@ -11,7 +11,9 @@ from pathlib import Path
 from typing import Union, Optional, Set, Callable, Tuple, Any
 
 from aandd_reader.config import Config
-from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
+from aandd_reader.server_fastapi.spec_ctrl import (
+    aandd_reader_api_spec,
+)
 from aandd_reader.server_fastapi.models.comman import (
     ResultResponse,
 )
@@ -40,7 +42,7 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
 
         if config is not None:
             server_ip = config.SERVER_IP
-            server_port = config.SERVER_PORT
+            server_port = config.FASTAPI_PORT
 
         self._logger = logger
 
