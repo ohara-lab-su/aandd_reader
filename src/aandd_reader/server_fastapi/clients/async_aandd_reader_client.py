@@ -14,7 +14,6 @@ from aandd_reader.config import Config
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
 from aandd_reader.server_fastapi.models.comman import (
     ResultResponse,
-    ThresholdEventResponse,
 )
 
 from fastapi_frame.clients.async_device_client import AsyncDeviceClient
