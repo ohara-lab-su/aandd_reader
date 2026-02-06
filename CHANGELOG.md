@@ -9,6 +9,7 @@ gRPC frame の joypad 以外の利用
 
 - 基本利用: テストOK
 - event は gRPC を用いて再度実装やり直し中
+
  
 ## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
 
