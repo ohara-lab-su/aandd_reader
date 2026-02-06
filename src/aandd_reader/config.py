@@ -9,10 +9,13 @@ import yaml
 
 
 class Config:
-    PORT = "COM2"
+    DEVICE_PORT = "COM2"
     SERVER_LOGGER_NAME = "AanddReaderServer"
-    SERVER_IP = "10.170.10.33"
-    SERVER_PORT = 8004
+    # SERVER_IP = "10.170.10.33"
+    SERVER_IP = "10.170.10.38"
+    # SERVER_PORT = 8004
+    FASTAPI_PORT = 8004
+    GRPC_PORT = 50051
     CLIENT_LOGGER_NAME = "AanddReaderClient"
 
     def __init__(self, yaml_path=None):
