@@ -12,7 +12,8 @@ from concurrent import futures
 from typing import Any, Optional
 
 import grpc
-from grpc import channel_ready_future
+
+# from grpc import channel_ready_future
 
 # --- gRPC-frame (new: ctrl.Control/Describe, ctrl.Control/Call) ---
 # import grpc_frame.ctrl_pb2 as ctrl_pb2
@@ -29,11 +30,11 @@ from x_logger.x_logger import XLogger
 # Servicer クラス を用いた、server の起動
 # ============================================================
 def aandd_reader_server(
-        device_port: str,
-        grpc_host: str,
-        grpc_port: int,
-        logger: Optional[Any] = None,
-        log_level: str = "INFO",
+    device_port: str,
+    grpc_host: str,
+    grpc_port: int,
+    logger: Optional[Any] = None,
+    log_level: str = "INFO",
 ) -> None:
     """ """
     # XLogger が存在しない時に仕方がないのでデフォルトの logging を使う
