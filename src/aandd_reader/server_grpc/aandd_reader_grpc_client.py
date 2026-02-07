@@ -11,13 +11,23 @@ from grpc_frame.grpc_client import GrpcClient
 class AanddReaderGrpcClient(GrpcClient):
     def __init__(
         self,
-        config: Any = None,
+        config: Optional[Any] = None,
         server_ip: Optional[str] = None,
         server_port: Optional[int] = None,
-        logger: Any = None,
-        log_level: str = "INFO",
         timeout_sec: Optional[float] = None,
+        logger: Optional[Any] = None,
+        log_level: Optional[str] = None,
     ) -> None:
+        """
+
+        Args:
+            config:
+            server_ip:  gRPC ではなくて、Device Ctrl 側に食わせる
+            server_port:  gRPC ではなくて、Device Ctrl 側に食わせる
+            timeout_sec:
+            logger:
+            log_level:
+        """
         grpc_client_module.events_pb2 = events_pb2
 
         if config is not None:
@@ -27,7 +37,7 @@ class AanddReaderGrpcClient(GrpcClient):
         super().__init__(
             server_ip=str(server_ip),
             server_port=int(server_port),
+            timeout_sec=timeout_sec,
             logger=logger,
             log_level=log_level,
-            timeout_sec=timeout_sec,
         )

@@ -28,13 +28,14 @@ def aandd_reader_server(
     grpc_host: str,
     grpc_port: int,
     logger: Optional[Any] = None,
-    log_level: str = "INFO",
+    log_level: Optional[str] = None,
 ) -> None:
     """"""
     # XLogger が存在しない時に仕方がないのでデフォルトの logging を使う
     if logger is None:
         import logging
 
+        log_level = log_level or "INFO"
         logging.basicConfig(level=log_level.upper())
         logger = logging.getLogger(__name__)
 

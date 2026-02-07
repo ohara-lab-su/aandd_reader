@@ -6,7 +6,11 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from aandd_reader_grpc_client import AandDReaderGrpcClient
+
+from aandd_reader import Config
+from aandd_reader.server_grpc.aandd_reader_grpc_client import AanddReaderGrpcClient
+
+from x_logger import XLogger
 
 
 def on_weight_event(payload: Any) -> None:
@@ -16,9 +20,22 @@ def on_weight_event(payload: Any) -> None:
 
 
 def main() -> None:
-    client = AandDReaderGrpcClient(
-        host="10.170.10.38",
-        port=50051,
+    Config.load_yaml("config_server1.yaml")
+
+    log_level = "info"
+
+    logger = XLogger(
+        log_level=log_level,
+        logger_name="aandd_reader",
+    )
+
+    client = AanddReaderGrpcClient(
+        config=Config,
+        server_ip=None,
+        server_port=None,
+        timeout_sec=None,
+        logger=logger,
+        log_level=None,  # logger があるときは よまないので None
     )
 
     # 1) サーバ側で stream を開始（スレッド起動）
