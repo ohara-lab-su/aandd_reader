@@ -9,9 +9,7 @@ from typing import Any
 from aandd_reader_grpc_client import AandDReaderGrpcClient
 
 
-# --- イベント受信時に起動したい処理 ---
 def on_weight_event(payload: Any) -> None:
-    # payload は adapter.unpack_result() 済み
     print("=== EVENT RECEIVED ===")
     print(payload)
     print("=======================")
@@ -23,12 +21,21 @@ def main() -> None:
         port=50051,
     )
 
-    # --- stream 測定開始（サーバ側でスレッド起動） ---
-    # 閾値・条件はサーバ側 ctrl 実装に委ねる
+    # 1) サーバ側で stream を開始（スレッド起動）
     client.stream_start()
 
-    # --- event 待機 ---
-    # topic 名はサーバ側 publish と一致させる
+    # 2) 閾値条件を設定（ctrl 側 AanddReader.event_set_config）
+    #    topic は Subscribe(topic=...) と一致させます。
+    client.event_set_config(
+        threshold=10.0,
+        above=True,
+        topic="weight_threshold",
+    )
+
+    # 3) 1回分だけイベント待機状態にする（ctrl 側 AanddReader.event_arm）
+    client.event_arm()
+
+    # 4) サーバからのイベントを待つ（polling ではなく Subscribe のストリーム）
     for event in client.subscribe(
         topic="weight_threshold",
         once=True,
@@ -36,12 +43,7 @@ def main() -> None:
         on_weight_event(event)
         break
 
-    # --- 必要なら再度待機可能 ---
-    # client.stream_wait()
-    # for event in client.subscribe(topic="weight_threshold", once=True):
-    #     on_weight_event(event)
-
-    # --- 終了 ---
+    # 5) 後始末
     client.stream_stop()
     time.sleep(0.1)
 
