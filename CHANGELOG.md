@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026.02.04 v0.1.1, nakada, (gRPC 利用モードの実装)
+
+- bugfix
+  - grpc_client_stream_event.py
+    - イベントを実際に使ったストリーム利用例
+  - aandd_reader.py
+    - デバイス制御(ストレームモードを使える形に整備)
+
 ## 2026.02.04 v0.1.0, nakada, (gRPC 利用モードの実装)
 
 - stream未テスト,watch 昨日は削除済み

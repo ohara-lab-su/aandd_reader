@@ -358,6 +358,16 @@ class AanddReader:
         threshold_g: float,
         once: bool = True,
     ) -> bool:
+        """
+
+        Args:
+            topic (str): event bus に流す topic
+            threshold_g:
+            once:
+
+        Returns:
+
+        """
         with self._lock:
             self._event_topic = topic
             self._event_threshold_g = float(threshold_g)
@@ -425,8 +435,12 @@ class AanddReader:
             once = True
 
             with self._lock:
+                ############################
+                # event_bus (_set_event_bus(obj) にてセットされる)
                 event_bus = self._event_bus
+                # event_arm で入手される topic
                 topic = self._event_topic
+                ############################
                 threshold_g = self._event_threshold_g
                 armed = bool(self._event_armed)
                 once = bool(self._event_once)
@@ -440,6 +454,7 @@ class AanddReader:
             if threshold_g is None:
                 continue
 
+            # 閾値を超えたときには Event_bus に流す
             if weight_val >= float(threshold_g):
                 payload = {
                     "weight_g": weight_val,
