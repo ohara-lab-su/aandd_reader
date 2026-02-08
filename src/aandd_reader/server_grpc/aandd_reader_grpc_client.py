@@ -21,12 +21,12 @@ class AanddReaderGrpcClient(GrpcClient):
         """
 
         Args:
-            config:
-            server_ip:  gRPC ではなくて、Device Ctrl 側に食わせる
-            server_port:  gRPC ではなくて、Device Ctrl 側に食わせる
-            timeout_sec:
-            logger:
-            log_level:
+            config (Any):
+            server_ip (str):  gRPC ではなくて、Device Ctrl 側に食わせる
+            server_port (int):  gRPC ではなくて、Device Ctrl 側に食わせる
+            timeout_sec (float): Device Ctrl 側 (None だとデフォの 0.5)
+            logger (Any):
+            log_level (str):
         """
         grpc_client_module.events_pb2 = events_pb2
 

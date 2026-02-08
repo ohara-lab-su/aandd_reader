@@ -26,16 +26,17 @@ def main() -> None:
     log_level = "info"
 
     logger = XLogger(
-        log_level="INFO",
+        log_level=log_level,
         logger_name=Config.CLIENT_LOGGER_NAME,
     )
 
     client = AanddReaderGrpcClient(
-        server_ip="10.170.10.38",
-        server_port=50051,  # gRPC
+        config=Config,
+        # server_ip="10.170.10.38",
+        # server_port=50051,  # gRPC
+        # timeout_sec=0.5,  # 入力しなければ、None がデフォでNonだと 0.5 になる
         logger=logger,
-        log_level="INFO",
-        timeout_sec=5.0,
+        log_level=log_level,
     )
 
     # client.reset()
