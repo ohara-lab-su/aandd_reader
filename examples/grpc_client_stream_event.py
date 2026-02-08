@@ -6,10 +6,8 @@ from __future__ import annotations
 import time
 from typing import Any
 
-
 from aandd_reader import Config
-from aandd_reader.server_grpc.aandd_reader_grpc_client import AanddReaderGrpcClient
-
+from aandd_reader.server_grpc import AanddReaderGrpcClient
 from x_logger import XLogger
 
 
@@ -31,36 +29,23 @@ def main() -> None:
 
     client = AanddReaderGrpcClient(
         config=Config,
-        # server_ip="10.170.10.38",
-        # server_port=50051,  # gRPC
-        # timeout_sec=0.5,  # 入力しなければ、None がデフォでNonだと 0.5 になる
         logger=logger,
-        log_level=log_level,  # logger があるときは よまない
+        log_level=log_level,
     )
 
-    # 1) サーバ側で stream を開始（スレッド起動）
-    client.stream_start()
-
-    # 2) 閾値条件を設定（ctrl 側 AanddReader.event_set_config）
-    #    topic は Subscribe(topic=...) と一致させます。
-    client.event_set_config(
-        threshold=10.0,
+    # --- Event 測定の準備（順番はクライアント内部に閉じ込める） ---
+    client.prepare_event_measurement(
+        topic="weight_threshold",
+        threshold=10.0,  # 閾値g
         above=True,
-        topic="weight_threshold",
+        once=True,
     )
 
-    # 3) 1回分だけイベント待機状態にする（ctrl 側 AanddReader.event_arm）
-    client.event_arm()
+    # --- 1イベント待つ ---
+    event = client.wait_event()
+    on_weight_event(event)
 
-    # 4) サーバからのイベントを待つ（polling ではなく Subscribe のストリーム）
-    for event in client.subscribe(
-        topic="weight_threshold",
-        once=True,
-    ):
-        on_weight_event(event)
-        break
-
-    # 5) 後始末
+    # --- 後始末 ---
     client.stream_stop()
     time.sleep(0.1)
 

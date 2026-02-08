@@ -1,4 +1,5 @@
 """
+K.NAKADA, kengo.nakada@gmail.com/kengo.nakada@mat.shimane-u.ac.jp
 基本トライ　ACK なしにする(出荷時)
 """
 
@@ -65,19 +66,40 @@ class AanddReader:
             sys.exit(1)
 
         # ----------------------------------
+        # stream 測定スレッド制御
+        self._stream_thread = None
+        self._stream_stop_event = threading.Event()
+        # ----------------------------------
+
+        # ----------------------------------
         # gRPC 利用を意識
         # _stream で得た値が式意図を超えたときの結果によってevent発生
         # Event / stream related
         self._lock = threading.Lock()
 
+        # ----------------------------------
+        # 外部通知先 (gRPC Event)
+        #
+        # 測定クライアント側で
+        # AanddReader生成
+        #   → EventBus生成
+        #   → reader._set_event_bus(event_bus)
+        #   → stream_start()
+        #   → event_arm()
         self._event_bus: Optional[Any] = None
+        #
+        # eventを使わない場合
+        # (1) _event_sub は None
+        # (2) stream_start() は呼ばれない
+        # (3) event_arm() は呼ばれない
+
+        # ----------------------------------
+        # イベント条件・状態
+        # (gRPCに依存してないが実質的にはgRPC-Eventで用いる)
         self._event_topic: Optional[str] = None
         self._event_threshold_g: Optional[float] = None
         self._event_once: bool = True
         self._event_armed: bool = False
-
-        self._stream_thread = None
-        self._stream_stop_event = threading.Event()
         # ----------------------------------
 
     def __del__(self):
@@ -162,7 +184,7 @@ class AanddReader:
     def meas(
         self,
         mode: Optional[str] = None,
-    ) -> Union[bool, float, None]:
+    ) -> Union[bool, float, str, None]:
         """
         Q
         即時計測する
@@ -495,6 +517,9 @@ class AanddReader:
         threshold_g: float,
         once: bool = True,
     ) -> bool:
+        """
+        Event を使って閾値を超えたときに(主にgRPCから) 使われるフラグ制御
+        """
         with self._lock:
             self._event_topic = topic
             self._event_threshold_g = float(threshold_g)
@@ -613,6 +638,6 @@ if __name__ == "__main__":
     # aandd_reader.cal()
     logger_.info(f"SN: {aandd_reader.get_serial_number()}")
     time.sleep(0.5)
-    logger_.info(aandd_reader.meas())
+    logger_.info(f"{aandd_reader.meas()}")
     # print(aandd_reader.status())
     # print(aandd_reader.unit())

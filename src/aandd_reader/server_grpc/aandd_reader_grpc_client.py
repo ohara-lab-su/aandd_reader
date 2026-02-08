@@ -41,3 +41,49 @@ class AanddReaderGrpcClient(GrpcClient):
             logger=logger,
             log_level=log_level,
         )
+
+        # for gRPC Event
+        self._event_topic: Optional[str] = None
+        self._event_once: bool = True
+
+    def prepare_event_measurement(
+        self,
+        *,
+        topic: str,
+        threshold: float,
+        above: bool = True,
+        once: bool = True,
+    ) -> None:
+        """
+        Event 計測の用の煩雑な手続きを省略するメソッド
+
+        Args:
+            topic:
+            threshold:
+            above:
+            once:
+
+        Returns:
+
+        """
+        self.stream_start()
+
+        self.event_set_config(
+            threshold=threshold,
+            above=above,
+            topic=topic,
+        )
+
+        self.event_arm()
+
+        self._event_topic = topic
+        self._event_once = once
+
+    def wait_event(self):
+        """1イベント待つための薄いラッパー"""
+        topic = getattr(self, "_event_topic", None)
+        if topic is None:
+            raise RuntimeError("event is not prepared")
+
+        for event in self.subscribe(topic=topic, once=True):
+            return event
