@@ -1,6 +1,8 @@
 """
 K.NAKADA, kengo.nakada@gmail.com/kengo.nakada@mat.shimane-u.ac.jp
-基本トライ　ACK なしにする(出荷時)
+基本トライ
+- ACK なし(出荷時)
+- ACK あり(現在)
 """
 
 from typing import Any, Dict, List, Optional, Union, Tuple, Callable, Sequence
@@ -337,6 +339,8 @@ class AanddReader:
         self,
     ) -> Union[str, bool]:
         """reset
+        ACK前提
+
         reset 後、測定するには 0.5 s くらい待たないとダメ
         """
         self._logger.debug(f"[Serial] Reset(): _r")
@@ -365,6 +369,8 @@ class AanddReader:
         self,
     ) -> Union[bool, float]:
         """
+        ACKモード前提
+
         Q, 安定後、データ取得
 
         Returns:
@@ -397,6 +403,8 @@ class AanddReader:
         self,
     ) -> Union[bool, float]:
         """
+        ACKモード前提
+
         Q, 即時
 
         Returns:
