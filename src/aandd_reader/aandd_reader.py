@@ -27,12 +27,13 @@ class AanddReader:
         baud_rate: Optional[int] = None,
         timeout: Optional[float] = None,
         logger: Optional[Any] = None,
-        log_level: str = "info",
+        log_level: Optional[str] = None,
     ):
         # XLogger が存在しない時に仕方がないのでデフォルトの logging を使う
         if logger is None:
             import logging
 
+            log_level = log_level or "INFO"
             logging.basicConfig(level=log_level.upper())
             logger = logging.getLogger(__name__)
 
@@ -66,15 +67,17 @@ class AanddReader:
         # ----------------------------------
         # gRPC 利用を意識
         # _stream で得た値が式意図を超えたときの結果によってevent発生
-        self._event_bus = None
+        # Event / stream related
+        self._lock = threading.Lock()
+
+        self._event_bus: Optional[Any] = None
+        self._event_topic: Optional[str] = None
+        self._event_threshold_g: Optional[float] = None
+        self._event_once: bool = True
+        self._event_armed: bool = False
 
         self._stream_thread = None
         self._stream_stop_event = threading.Event()
-
-        self._event_topic = None
-        self._event_threshold_g = None
-        self._event_once = True
-        self._event_armed = False
         # ----------------------------------
 
     def __del__(self):
@@ -87,13 +90,13 @@ class AanddReader:
     # Device Info API
     # ---------------------------
 
-    def status(self):
+    def status(self) -> Optional[str]:
         return self._status
 
     def get_status(self) -> Optional[str]:
         return self._status
 
-    def unit(self):
+    def unit(self) -> Optional[str]:
         return self._unit
 
     def get_unit(self) -> Optional[str]:
@@ -150,7 +153,7 @@ class AanddReader:
     # Device Ctrl API
     # ---------------------------------
 
-    def reset(self):
+    def reset(self) -> Union[bool, str]:
         """reset
         reset 後、測定するには 0.5 s くらい待たないとダメ
         """
@@ -159,27 +162,154 @@ class AanddReader:
     def meas(
         self,
         mode: Optional[str] = None,
-    ):
+    ) -> Union[bool, float, None]:
         """
         Q
         即時計測する
         Returns:
         """
-        if mode is None:
-            mode = self._meas_mode
+        mode_val = mode
+        if mode_val is None:
+            mode_val = self._meas_mode
 
-        self._logger.debug(f"[Meas] mode = {mode}")
+        self._logger.debug(f"[Meas] mode = {mode_val}")
 
-        if mode.upper() == "Q":
-            return self._q()
-        elif mode.upper() == "S":
-            return self._s()
-        else:
-            return ""
+        if mode_val.upper() == "Q":
+            q_val = self._q()
+            if isinstance(q_val, bool):
+                return False
+            if isinstance(q_val, float):
+                return q_val
+            return False
+
+        if mode_val.upper() == "S":
+            s_val = self._s()
+            if isinstance(s_val, bool):
+                return False
+            if isinstance(s_val, float):
+                return s_val
+            return False
+
+        return False
 
     # ---------------------------------
     # Device Ctrl Driver
     # ---------------------------------
+
+    # def _r(
+    #     self,
+    # ) -> Union[str, bool]:
+    #     """reset
+    #     reset 後、測定するには 0.5 s くらい待たないとダメ
+    #     """
+    #     if self._ser is None:
+    #         # raise RuntimeError("Serial port is not opened.")
+    #         self._logger.error("Serial port is not opened.")
+    #         return False
+
+    #     self._ser.reset_input_buffer()
+    #     self._ser.write(b"R\r\n")
+
+    #     try:
+    #         line = self._ser.readline()
+    #     except Exception as e:
+    #         self._logger.error(f"**Error**: {e}")
+    #         return False
+
+    #     if len(line) == 0:
+    #         self._logger.error("**Error**: No data received.")
+    #         return False
+
+    #     return line[0] == 0x06
+
+    # def _s(
+    #     self,
+    # ) -> Union[bool, Union[str, float, None]]:
+    #     """
+    #     Q, 安定後、データ取得
+
+    #     Returns:
+    #     """
+    #     if self._ser is None:
+    #         self._logger.error("Serial port is not opened.")
+    #         return False
+
+    #     self._ser.reset_input_buffer()
+
+    #     try:
+    #         self._ser.write(b"S\r\n")
+    #         line = self._ser.readline()
+    #     except Exception as e:
+    #         self._logger.error(f"**Error**: {e}")
+    #         return False
+
+    #     if len(line) == 17:
+    #         line = line.rstrip()
+    #         try:
+    #             self._status: Optional[str] = str(
+    #                 line[0:2].decode()
+    #             )  # 測定状態(ST:安定)
+    #             self._weight: Optional[float] = float(line[3:12].decode())
+    #             self._unit: Optional[str] = str(line[12:15].decode().strip())
+    #         except Exception as e:
+    #             self._logger.error(f"**Error**: {e}")
+    #             self._logger.error(f"line: {line}")
+    #             return False
+    #     else:
+    #         self._logger.error(line)
+    #         return False
+    #     return self._weight
+
+    # def _q(
+    #     self,
+    # ) -> Union[bool, Union[float, Tuple[str, str, str]]]:
+    #     """
+    #     Q, 即時
+
+    #     Returns:
+    #     """
+    #     if self._ser is None:
+    #         self._logger.error("Serial port is not opened.")
+    #         return False
+    #     self._ser.reset_input_buffer()
+
+    #     try:
+    #         self._ser.write(b"Q\r\n")
+    #         line = self._ser.readline()
+    #     except Exception as e:
+    #         self._logger.error(f"**Error(readline)**: {e}")
+    #         return False
+
+    #     if b"EC,E02" in line:
+    #         # 計測時間が短くて前回の命令動作を本体足しているときなど
+    #         self._logger.error(f"**Error(EC, E02)**: {line}")
+    #         self._logger.error(
+    #             f"計測時間が短くて前回の命令動作を本体足している可能性があります"
+    #         )
+    #         return False
+
+    #     if len(line) == 17:
+    #         line = line.rstrip()
+    #         try:
+    #             self._status: Optional[str] = str(
+    #                 line[0:2].decode()
+    #             )  # 測定状態(ST:安定)
+    #             self._weight: Optional[float] = float(line[3:12].decode())
+    #             self._unit: Optional[str] = str(line[12:15].decode().strip())
+    #         except Exception as e:
+    #             self._logger.error(f"**Error(line==17)**: {e}")
+    #             self._logger.error(f"line: {line}")
+    #             return False
+    #     else:
+    #         self._logger.error(f"**Error(len(line)!=17)**: {line}")
+    #         self._logger.error(
+    #             f"返信メッセージが正しくない可能性があります。たとえば「空」の可能性です"
+    #         )
+    #         self._logger.error(f"計測モードなどのパラメーターを疑ってください")
+    #         self._logger.error(f"line: {line}")
+    #         return False
+
+    #     return self._weight
 
     def _r(
         self,
@@ -187,8 +317,8 @@ class AanddReader:
         """reset
         reset 後、測定するには 0.5 s くらい待たないとダメ
         """
+        self._logger.debug(f"[Serial] Reset(): _r")
         if self._ser is None:
-            # raise RuntimeError("Serial port is not opened.")
             self._logger.error("Serial port is not opened.")
             return False
 
@@ -205,11 +335,13 @@ class AanddReader:
             self._logger.error("**Error**: No data received.")
             return False
 
-        return line[0] == 0x06
+        if line[0] == 0x06:
+            return True
+        return False
 
     def _s(
         self,
-    ) -> Union[bool, Union[str, float, None]]:
+    ) -> Union[bool, float]:
         """
         Q, 安定後、データ取得
 
@@ -228,26 +360,20 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return False
 
-        if len(line) == 17:
-            line = line.rstrip()
-            try:
-                self._status: Optional[str] = str(
-                    line[0:2].decode()
-                )  # 測定状態(ST:安定)
-                self._weight: Optional[float] = float(line[3:12].decode())
-                self._unit: Optional[str] = str(line[12:15].decode().strip())
-            except Exception as e:
-                self._logger.error(f"**Error**: {e}")
-                self._logger.error(f"line: {line}")
-                return False
-        else:
+        parsed = self._parse_measure_line(line)
+        if parsed is None:
             self._logger.error(line)
             return False
-        return self._weight
+
+        status, weight, unit = parsed
+        self._status = status
+        self._weight = weight
+        self._unit = unit
+        return float(weight)
 
     def _q(
         self,
-    ) -> Union[bool, Union[float, Tuple[str, str, str]]]:
+    ) -> Union[bool, float]:
         """
         Q, 即時
 
@@ -256,6 +382,7 @@ class AanddReader:
         if self._ser is None:
             self._logger.error("Serial port is not opened.")
             return False
+
         self._ser.reset_input_buffer()
 
         try:
@@ -266,39 +393,29 @@ class AanddReader:
             return False
 
         if b"EC,E02" in line:
-            # 計測時間が短くて前回の命令動作を本体足しているときなど
             self._logger.error(f"**Error(EC, E02)**: {line}")
             self._logger.error(
-                f"計測時間が短くて前回の命令動作を本体足している可能性があります"
+                "計測時間が短くて前回の命令動作を本体足している可能性があります"
             )
             return False
 
-        if len(line) == 17:
-            line = line.rstrip()
-            try:
-                self._status: Optional[str] = str(
-                    line[0:2].decode()
-                )  # 測定状態(ST:安定)
-                self._weight: Optional[float] = float(line[3:12].decode())
-                self._unit: Optional[str] = str(line[12:15].decode().strip())
-            except Exception as e:
-                self._logger.error(f"**Error(line==17)**: {e}")
-                self._logger.error(f"line: {line}")
-                return False
-        else:
+        parsed = self._parse_measure_line(line)
+        if parsed is None:
             self._logger.error(f"**Error(len(line)!=17)**: {line}")
             self._logger.error(
-                f"返信メッセージが正しくない可能性があります。たとえば「空」の可能性です"
+                "返信メッセージが正しくない可能性があります。たとえば「空」の可能性です"
             )
-            self._logger.error(f"計測モードなどのパラメーターを疑ってください")
+            self._logger.error("計測モードなどのパラメーターを疑ってください")
             self._logger.error(f"line: {line}")
             return False
 
-        return self._weight
+        status, weight, unit = parsed
+        self._status = status
+        self._weight = weight
+        self._unit = unit
+        return float(weight)
 
-    def _stream(
-        self,
-    ) -> Union[float, Optional[bool]]:
+    def _stream(self) -> Union[bool, float]:
         """
         ストリームデータを1行読む
 
@@ -329,25 +446,45 @@ class AanddReader:
             self._logger.error("No data received.")
             return False
 
-        # 例: b'ST,+0000.000  g\r\n'
-        line = line.rstrip()
-
-        # 長さチェックは「厳密に固定しない」
-        # フォーマット前提で切る
-        try:
-            self._status: Optional[str] = str(line[0:2].decode())
-            self._weight: Optional[float] = float(line[3:12].decode())
-            self._unit: Optional[str] = str(line[12:15].decode().strip())
-        except Exception:
+        parsed = self._parse_measure_line(line)
+        if parsed is None:
             return False
 
-        return self._weight
+        status, weight, unit = parsed
+        self._status = status
+        self._weight = weight
+        self._unit = unit
+        return float(weight)
+
+    @staticmethod
+    def _parse_measure_line(
+        line: bytes,
+    ) -> Optional[Tuple[str, float, str]]:
+        """"""
+        if line is None:
+            return None
+
+        raw = line.rstrip()
+
+        # 例: b'ST,+0000.000  g\r\n' を想定
+        # 固定長の厳密チェックはしないが、最低限の slicing が成立する長さは必要
+        if len(raw) < 15:
+            return None
+
+        try:
+            status = raw[0:2].decode()
+            weight = float(raw[3:12].decode())
+            unit = raw[12:15].decode().strip()
+        except Exception:
+            return None
+
+        return status, weight, unit
 
     # ----------------------------
     # for Event
     # ----------------------------
 
-    def _set_event_bus(self, event_bus) -> None:
+    def _set_event_bus(self, event_bus: Any) -> None:
         with self._lock:
             self._event_bus = event_bus
 
@@ -358,21 +495,16 @@ class AanddReader:
         threshold_g: float,
         once: bool = True,
     ) -> bool:
-        """
-
-        Args:
-            topic (str): event bus に流す topic
-            threshold_g:
-            once:
-
-        Returns:
-
-        """
         with self._lock:
             self._event_topic = topic
             self._event_threshold_g = float(threshold_g)
             self._event_once = bool(once)
             self._event_armed = True
+        return True
+
+    def event_disarm(self) -> bool:
+        with self._lock:
+            self._event_armed = False
         return True
 
     def stream_start(self) -> bool:
@@ -396,7 +528,7 @@ class AanddReader:
         with self._lock:
             self._stream_stop_event.set()
 
-        thread_obj = None
+        thread_obj: Optional[threading.Thread] = None
         with self._lock:
             thread_obj = self._stream_thread
 
@@ -416,31 +548,22 @@ class AanddReader:
             if self._stream_stop_event.is_set():
                 return
 
-            try:
-                weight_str = self._stream()
-            except Exception:
+            stream_val = self._stream()
+            if isinstance(stream_val, bool):
                 time.sleep(0.05)
                 continue
 
-            try:
-                weight_g, _unit = self._extract_weight(weight_str)
-                weight_val = float(weight_g)
-            except Exception:
-                continue
+            weight_val = float(stream_val)
 
-            event_bus = None
-            topic = None
-            threshold_g = None
+            event_bus: Optional[Any] = None
+            topic: Optional[str] = None
+            threshold_g: Optional[float] = None
             armed = False
             once = True
 
             with self._lock:
-                ############################
-                # event_bus (_set_event_bus(obj) にてセットされる)
                 event_bus = self._event_bus
-                # event_arm で入手される topic
                 topic = self._event_topic
-                ############################
                 threshold_g = self._event_threshold_g
                 armed = bool(self._event_armed)
                 once = bool(self._event_once)
@@ -456,7 +579,7 @@ class AanddReader:
 
             # 閾値を超えたときには Event_bus に流す
             if weight_val >= float(threshold_g):
-                payload = {
+                payload: Dict[str, Any] = {
                     "weight_g": weight_val,
                     "threshold_g": float(threshold_g),
                 }

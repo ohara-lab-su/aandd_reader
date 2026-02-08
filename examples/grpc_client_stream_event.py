@@ -31,11 +31,11 @@ def main() -> None:
 
     client = AanddReaderGrpcClient(
         config=Config,
-        server_ip=None,
-        server_port=None,
-        timeout_sec=None,
+        # server_ip="10.170.10.38",
+        # server_port=50051,  # gRPC
+        # timeout_sec=0.5,  # 入力しなければ、None がデフォでNonだと 0.5 になる
         logger=logger,
-        log_level=None,  # logger があるときは よまないので None
+        log_level=log_level,  # logger があるときは よまない
     )
 
     # 1) サーバ側で stream を開始（スレッド起動）
