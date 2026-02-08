@@ -14,23 +14,30 @@ from typing import Any, Optional
 import grpc
 from grpc import channel_ready_future
 
-
+from aandd_reader import Config
 from aandd_reader.server_grpc import aandd_reader_server
 
 from x_logger.x_logger import XLogger
-
 
 
 # ------------------------------------------------------------
 # main
 # ------------------------------------------------------------
 if __name__ == "__main__":
-    DEVICE_PORT = "COM3"
-    GRPC_HOST = "10.170.10.38"
-    GRPC_PORT = 50051
+    Config.load_yaml("config_server1.yaml")
+
+    DEVICE_PORT = Config.DEVICE_PORT
+    GRPC_HOST = Config.GRPC_HOST
+    GRPC_PORT = Config.GRPC_PORT
+    # DEVICE_PORT = "COM3"
+    # GRPC_HOST = "10.170.10.38"
+    # GRPC_PORT = 50051
     LOG_LEVEL = "INFO"
 
-    LOGGER = XLogger(log_level=LOG_LEVEL, logger_name="JoypadServer")
+    LOGGER = XLogger(
+        log_level=LOG_LEVEL,
+        logger_name="JoypadServer",
+    )
 
     aandd_reader_server(
         device_port=DEVICE_PORT,
