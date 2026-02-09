@@ -322,10 +322,12 @@ class AanddReader:
 
 
 if __name__ == "__main__":
+    from x_logger import XLogger
+
     _logger = XLogger(log_level="info")
     aandd_reader = AanddReader(port="COM3", logger=_logger)
     # aandd_reader.cal()
     print(aandd_reader.get_serial_number())
-    print(aandd_reader.meas())
+    print(f"meas: {aandd_reader.meas()}")
     print(aandd_reader.status())
     print(aandd_reader.unit())
