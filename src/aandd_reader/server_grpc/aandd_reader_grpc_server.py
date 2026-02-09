@@ -15,7 +15,7 @@ from grpc import channel_ready_future
 
 from grpc_frame.grpc_server import create_grpc_server
 
-from aandd_reader import AanddReader
+from aandd_reader.aandd_reader import AanddReader
 from x_logger import XLogger
 
 

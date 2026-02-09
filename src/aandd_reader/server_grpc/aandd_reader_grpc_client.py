@@ -32,7 +32,7 @@ class AanddReaderGrpcClient(GrpcClient):
 
         if config is not None:
             server_ip = config.SERVER_IP
-            server_port = config.SERVER_PORT
+            server_port = config.GRPC_PORT
 
         super().__init__(
             server_ip=str(server_ip),
