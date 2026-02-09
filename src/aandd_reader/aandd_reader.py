@@ -196,23 +196,11 @@ class AanddReader:
         if mode_val is None:
             mode_val = self._meas_mode
 
-        self._logger.debug(f"[Meas] mode = {mode_val}")
-
         if mode_val.upper() == "Q":
-            q_val = self._q()
-            if isinstance(q_val, bool):
-                return False
-            if isinstance(q_val, float):
-                return q_val
-            return False
+            return self._q()  # 0.0 は正常値 / False はデバイスエラー
 
         if mode_val.upper() == "S":
-            s_val = self._s()
-            if isinstance(s_val, bool):
-                return False
-            if isinstance(s_val, float):
-                return s_val
-            return False
+            return self._s()  # 0.0 は正常値 / False はデバイスエラー
 
         return False
 
