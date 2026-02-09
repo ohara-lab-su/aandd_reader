@@ -197,10 +197,10 @@ class AanddReader:
             mode_val = self._meas_mode
 
         if mode_val.upper() == "Q":
-            return self._q()  # False はデバイスエラー
+            return self._q()
 
         if mode_val.upper() == "S":
-            return self._s()  # False はデバイスエラー
+            return self._s()
 
         return False
 
