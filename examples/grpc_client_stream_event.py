@@ -36,7 +36,7 @@ def main() -> None:
     # --- Event 測定の準備（順番はクライアント内部に閉じ込める） ---
     client.prepare_event_measurement(
         topic="weight_threshold",
-        threshold=10.0,  # 閾値g
+        threshold_g=10.0,  # 閾値g
         above=True,
         once=True,
     )
