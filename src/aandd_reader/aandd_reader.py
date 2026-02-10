@@ -126,6 +126,8 @@ class AanddReader:
         self._event_threshold_g: Optional[float] = None
         self._event_once: bool = True
         self._event_armed: bool = False
+
+        self._event_above: bool = True
         # ----------------------------------
 
     def __del__(self):
@@ -257,121 +259,6 @@ class AanddReader:
     # ---------------------------------
     # Device Ctrl Driver
     # ---------------------------------
-
-    # def _r(
-    #     self,
-    # ) -> Union[str, bool]:
-    #     """reset
-    #     reset 後、測定するには 0.5 s くらい待たないとダメ
-    #     """
-    #     if self._ser is None:
-    #         # raise RuntimeError("Serial port is not opened.")
-    #         self._logger.error("Serial port is not opened.")
-    #         return False
-
-    #     self._ser.reset_input_buffer()
-    #     self._ser.write(b"R\r\n")
-
-    #     try:
-    #         line = self._ser.readline()
-    #     except Exception as e:
-    #         self._logger.error(f"**Error**: {e}")
-    #         return False
-
-    #     if len(line) == 0:
-    #         self._logger.error("**Error**: No data received.")
-    #         return False
-
-    #     return line[0] == 0x06
-
-    # def _s(
-    #     self,
-    # ) -> Union[bool, Union[str, float, None]]:
-    #     """
-    #     Q, 安定後、データ取得
-
-    #     Returns:
-    #     """
-    #     if self._ser is None:
-    #         self._logger.error("Serial port is not opened.")
-    #         return False
-
-    #     self._ser.reset_input_buffer()
-
-    #     try:
-    #         self._ser.write(b"S\r\n")
-    #         line = self._ser.readline()
-    #     except Exception as e:
-    #         self._logger.error(f"**Error**: {e}")
-    #         return False
-
-    #     if len(line) == 17:
-    #         line = line.rstrip()
-    #         try:
-    #             self._status: Optional[str] = str(
-    #                 line[0:2].decode()
-    #             )  # 測定状態(ST:安定)
-    #             self._weight: Optional[float] = float(line[3:12].decode())
-    #             self._unit: Optional[str] = str(line[12:15].decode().strip())
-    #         except Exception as e:
-    #             self._logger.error(f"**Error**: {e}")
-    #             self._logger.error(f"line: {line}")
-    #             return False
-    #     else:
-    #         self._logger.error(line)
-    #         return False
-    #     return self._weight
-
-    # def _q(
-    #     self,
-    # ) -> Union[bool, Union[float, Tuple[str, str, str]]]:
-    #     """
-    #     Q, 即時
-
-    #     Returns:
-    #     """
-    #     if self._ser is None:
-    #         self._logger.error("Serial port is not opened.")
-    #         return False
-    #     self._ser.reset_input_buffer()
-
-    #     try:
-    #         self._ser.write(b"Q\r\n")
-    #         line = self._ser.readline()
-    #     except Exception as e:
-    #         self._logger.error(f"**Error(readline)**: {e}")
-    #         return False
-
-    #     if b"EC,E02" in line:
-    #         # 計測時間が短くて前回の命令動作を本体足しているときなど
-    #         self._logger.error(f"**Error(EC, E02)**: {line}")
-    #         self._logger.error(
-    #             f"計測時間が短くて前回の命令動作を本体足している可能性があります"
-    #         )
-    #         return False
-
-    #     if len(line) == 17:
-    #         line = line.rstrip()
-    #         try:
-    #             self._status: Optional[str] = str(
-    #                 line[0:2].decode()
-    #             )  # 測定状態(ST:安定)
-    #             self._weight: Optional[float] = float(line[3:12].decode())
-    #             self._unit: Optional[str] = str(line[12:15].decode().strip())
-    #         except Exception as e:
-    #             self._logger.error(f"**Error(line==17)**: {e}")
-    #             self._logger.error(f"line: {line}")
-    #             return False
-    #     else:
-    #         self._logger.error(f"**Error(len(line)!=17)**: {line}")
-    #         self._logger.error(
-    #             f"返信メッセージが正しくない可能性があります。たとえば「空」の可能性です"
-    #         )
-    #         self._logger.error(f"計測モードなどのパラメーターを疑ってください")
-    #         self._logger.error(f"line: {line}")
-    #         return False
-
-    #     return self._weight
 
     def _r(
         self,
@@ -560,23 +447,43 @@ class AanddReader:
     # ----------------------------
 
     def _set_event_bus(self, event_bus: Any) -> None:
-        """gRPC の event による制御が回るように gRPC のイベントを挿入"""
+        """
+        gRPC の event による制御が回るように gRPC のイベントを挿入
+        """
         with self._lock:
             self._event_bus = event_bus
 
-    def event_arm(
+    def event_set_config(
         self,
         *,
         topic: str,
         threshold_g: float,
-        once: bool = True,
+        above: bool = True,
     ) -> bool:
         """
-        Event を使って閾値を超えたときに(主にgRPCから) 使われるフラグ制御
+        Event 条件の設定だけを行う。
+        設定後、event_arm() で armed を有効化する。
         """
         with self._lock:
             self._event_topic = topic
             self._event_threshold_g = float(threshold_g)
+            self._event_above = bool(above)
+        return True
+
+    def event_arm(
+        self,
+        *,
+        once: bool = True,
+    ) -> bool:
+        """
+        Event の armed フラグを立てる。
+        topic/threshold は event_set_config() で先に設定する。
+        """
+        with self._lock:
+            if self._event_topic is None:
+                return False
+            if self._event_threshold_g is None:
+                return False
             self._event_once = bool(once)
             self._event_armed = True
         return True
