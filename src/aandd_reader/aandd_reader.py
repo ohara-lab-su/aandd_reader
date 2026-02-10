@@ -106,8 +106,20 @@ class AanddReader:
 
     def __del__(self):
         try:
-            self._ser.close()
+            self.close()
         except Exception as e:
+            pass
+
+    def close(self) -> None:
+        """ストリーム停止とシリアルクローズを確実に行う"""
+        try:
+            self.stream_stop()
+        except Exception:
+            pass
+
+        try:
+            self._ser.close()
+        except Exception:
             pass
 
     # ---------------------------
@@ -192,6 +204,17 @@ class AanddReader:
         即時計測する
         Returns:
         """
+        # --- ストリームが動いているなら、必ず最新のストリーム値を返す ---
+        thread_obj = self._stream_thread
+        if thread_obj is not None and thread_obj.is_alive():
+            # 初回値がまだなら短時間だけ待つ
+            wait_sec = self._timeout if self._timeout is not None else 0.5
+            t0 = time.time()
+            while self._weight is None and (time.time() - t0) < wait_sec:
+                time.sleep(0.01)
+            return self._weight
+
+        # --- 通常の Q/S 測定 ---
         mode_val = mode
         if mode_val is None:
             mode_val = self._meas_mode

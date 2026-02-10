@@ -81,6 +81,10 @@ def aandd_reader_server(
     finally:
         server.stop(grace=None)
         logger.info("gRPC server stopped")
+        try:
+            ctrl.close()
+        except Exception as e:
+            pass
 
 
 if __name__ == "__main__":
