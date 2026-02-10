@@ -32,7 +32,7 @@ class AanddReaderGrpcClient(GrpcClient):
 
         if config is not None:
             server_ip = config.SERVER_IP
-            server_port = config.SERVER_PORT
+            server_port = config.GRPC_PORT
 
         super().__init__(
             server_ip=str(server_ip),
@@ -50,7 +50,7 @@ class AanddReaderGrpcClient(GrpcClient):
         self,
         *,
         topic: str,
-        threshold: float,
+        threshold_g: float,
         above: bool = True,
         once: bool = True,
     ) -> None:
@@ -69,7 +69,7 @@ class AanddReaderGrpcClient(GrpcClient):
         self.stream_start()
 
         self.event_set_config(
-            threshold=threshold,
+            threshold_g=threshold_g,
             above=above,
             topic=topic,
         )
