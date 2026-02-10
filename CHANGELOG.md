@@ -1,9 +1,14 @@
 # CHANGELOG
 
-## 2026.02.04 v0.2.0, nakada, (gRPC 利用モードの実装)
+## 2026.02.04 v0.2.0, nakada
 
-- 天秤側の動作モードを少し勘違いしていたのを修正
-(祖霊伴う aadnd_reader.py のキノン制御クラスの再デザイン)
+- aandd_reader.py (v0.2.0)
+- gRPC_frame.py (v0.4.4)
+
+修正内容
+
+- Event モードの動作テストおよびそれ位対して若干の改修
+- 天秤側の動作モードを少し勘違いしていたのを修正(基本クラスの修正) <- これが v0.2.0 へのバージョン変更の理由
 - make_pyi.py 修正(dispatchされる継承元と継承先)
 
 ## 2026.02.04 v0.1.1, nakada, (gRPC 利用モードの実装)
@@ -22,7 +27,7 @@
 - stream未テスト,watch 昨日は削除済み
 - new pyi 作成はテスト済み
 
-gRPC frame の joypad 以外の利用
+**gRPC frame の joypad 以外の利用**
 
 - 基本利用: テストOK
 - event は gRPC を用いて再度実装やり直し中
