@@ -11,18 +11,7 @@ import time
 import logging
 from pathlib import Path
 
-#!/usr/bin/env python
-"""
-Kengo NAKADA:
-https://github.com/shimane-dev, https://github.com/kengo-nakada
-kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
-"""
 # meas_grpc.py
-from __future__ import annotations
-
-import time
-import logging
-from pathlib import Path
 
 from aandd_reader import Config
 from aandd_reader.server_grpc import AanddReaderGrpcClient
