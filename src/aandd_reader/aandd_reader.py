@@ -15,6 +15,11 @@ Q/S/SIR などの“コマンド要求”とは別軸となる
 1	Auto print A（基準=ゼロ）	安定＋条件成立で自動出力
 2	Auto print B（基準=前回の安定値）	安定＋条件成立で自動出力
 3	Stream mode	連続出力（表示更新周期に依存）
+    SIR と実施的には同じである
+    SIR はコマンドでスタートをキックできる PTR3 は開始したら動きっぱなし
+    どちらも readline で値を読み続けることができる
+    *) 測定可能なサイクルは 5pd で、 5/10/20 回/秒設定が可能
+       SAMPLE-key --> ba5fnc
 4	Key mode B	PRINTキーを押すと出力（安定不要）
 5	Key mode C	PRINTキーで出力（安定なら即、非安定なら待つ）
 6	Interval mode	一定間隔で周期出力( mode3 との違いに注意)
@@ -128,6 +133,17 @@ class AanddReader:
         self._event_armed: bool = False
 
         self._event_above: bool = True
+        # ----------------------------------
+
+        # ----------------------------------
+        # トリガ判定用（streamイベント用）
+        self._trigger_mode: str = "raw"  # raw / mean / median / ema
+        self._trigger_window: int = 3
+        self._trigger_min_samples: int = 1
+        self._trigger_alpha: float = 0.3
+        self._trigger_buffer: List[float] = []
+        self._trigger_ema: Optional[float] = None
+        self._trigger_stable_only: bool = False
         # ----------------------------------
 
     def __del__(self):
@@ -478,6 +494,16 @@ class AanddReader:
         """
         Event の armed フラグを立てる。
         topic/threshold は event_set_config() で先に設定する。
+
+        armed を立てていると gRPC のイベントモードになるのでチェックする
+        そのときに onece を入れていると、一回だけ閾値超え判定がある。
+
+        Args:
+            once (bool):  イベントは一回のみ
+
+        Returns:
+            bool:
+
         """
         with self._lock:
             if self._event_topic is None:
@@ -492,6 +518,81 @@ class AanddReader:
         with self._lock:
             self._event_armed = False
         return True
+
+    def set_trigger_mode(
+        self,
+        *,
+        mode: str = "raw",
+        window: int = 3,
+        min_samples: Optional[int] = None,
+        alpha: float = 0.3,
+        stable_only: bool = False,
+    ) -> None:
+        """
+        streamイベントのトリガ値算出方法を設定する。
+
+        mode=raw, stable_only=True で値が stable のものだけ閾値チェック
+
+        Args:
+            mode: raw / mean / median / ema
+            window: 平均・中央値で使う窓サイズ
+            min_samples: 判定に必要な最小サンプル数（Noneならwindow）
+            alpha: EMA係数（0-1）
+            stable_only: TrueならST以外は無視
+        """
+        with self._lock:
+            self._trigger_mode = str(mode).lower()
+            w = max(1, int(window))
+            self._trigger_window = w
+            if min_samples is None:
+                self._trigger_min_samples = w
+            else:
+                self._trigger_min_samples = max(1, int(min_samples))
+            self._trigger_alpha = float(alpha)
+            self._trigger_buffer = []
+            self._trigger_ema = None
+            self._trigger_stable_only = bool(stable_only)
+
+    def _calc_trigger_value(self, weight_val: float) -> Optional[float]:
+        """
+        トリガ判定に使う値を計算する。
+        None を返した場合は判定をスキップする。
+        """
+        # 安定値だけ使う場合
+        if self._trigger_stable_only:
+            if self._status != "ST":
+                return None
+
+        buf = self._trigger_buffer
+        buf.append(weight_val)
+        if len(buf) > self._trigger_window:
+            del buf[0]
+
+        if len(buf) < self._trigger_min_samples:
+            return None
+
+        mode = self._trigger_mode
+
+        if mode == "raw":
+            return weight_val
+
+        if mode == "mean":
+            return sum(buf) / float(len(buf))
+
+        if mode == "median":
+            b = sorted(buf)
+            return b[len(b) // 2]
+
+        if mode == "ema":
+            if self._trigger_ema is None:
+                self._trigger_ema = weight_val
+            else:
+                a = self._trigger_alpha
+                self._trigger_ema = (a * weight_val) + ((1.0 - a) * self._trigger_ema)
+            return self._trigger_ema
+
+        # 不明なモードは raw と同じ扱い
+        return weight_val
 
     def stream_start(self) -> bool:
         with self._lock:
@@ -589,7 +690,16 @@ class AanddReader:
             armed = False
             once = True
 
+            ###################################################
+            # トリガーとして raw 値ではなくて計算する
+            trigger_val = self._calc_trigger_value(weight_val)
+            if trigger_val is None:
+                continue
+            weight_val = trigger_val
+            ###################################################
+
             with self._lock:
+                above = bool(self._event_above)
                 event_bus = self._event_bus
                 topic = self._event_topic
                 threshold_g = self._event_threshold_g
@@ -598,14 +708,23 @@ class AanddReader:
 
             if event_bus is None:
                 continue
-            if armed is False:
-                continue
             if topic is None:
                 continue
             if threshold_g is None:
                 continue
 
-            if weight_val >= float(threshold_g):
+            ###################################################
+            # 閾値チェックを入れるか入れないか？
+            # gRPC-event 入れるか？入れないか？
+            if armed is False:
+                continue
+
+            # 閾値より上と下を選べる
+            # if weight_val >= float(threshold_g):
+            if (above and weight_val >= float(threshold_g)) or (
+                (not above) and weight_val <= float(threshold_g)
+            ):
+                ###################################################
                 payload: Dict[str, Any] = {
                     "weight_g": weight_val,
                     "threshold_g": float(threshold_g),
@@ -616,6 +735,7 @@ class AanddReader:
                 except Exception:
                     pass
 
+                # 閾値判定は一回だけ発火(発火後のみどす)
                 if once:
                     with self._lock:
                         self._event_armed = False
