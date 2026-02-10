@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026.02.04 v0.2.1, nakada
+
+bugfix
+
 ## 2026.02.04 v0.2.0, nakada
 
 - aandd_reader.py (v0.2.0)
