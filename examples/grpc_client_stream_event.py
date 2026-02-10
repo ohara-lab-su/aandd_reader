@@ -39,6 +39,10 @@ def main() -> None:
         threshold_g=10.0,  # 閾値g
         above=True,
         once=True,
+        # trigger_mode="mean",
+        trigger_mode="raw",
+        # trigger_window=3,
+        # trigger_min_samples=3,
     )
 
     # --- 1イベント待つ ---

@@ -27,7 +27,7 @@ if __name__ == "__main__":
     Config.load_yaml("config_server1.yaml")
 
     DEVICE_PORT = Config.DEVICE_PORT
-    GRPC_HOST = Config.GRPC_HOST
+    GRPC_HOST = Config.SERVER_IP
     GRPC_PORT = Config.GRPC_PORT
     # DEVICE_PORT = "COM3"
     # GRPC_HOST = "10.170.10.38"

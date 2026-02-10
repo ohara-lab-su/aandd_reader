@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026.02.04 v0.2.3, nakada
+
+- server/start (example側) script のバグ修正
+- client 側に追加している trigger モードなどの機能を
+prepared に反映してたものを　example についか
+ 
 ## 2026.02.04 v0.2.2, nakada
 
 若干のバグ修正/トリガー機能(閾値判定)の拡張（使うのに利便性を伴った改修）
