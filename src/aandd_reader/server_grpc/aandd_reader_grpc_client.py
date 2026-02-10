@@ -53,18 +53,29 @@ class AanddReaderGrpcClient(GrpcClient):
         threshold_g: float,
         above: bool = True,
         once: bool = True,
+        # --- trigger mode ---
+        trigger_mode: str = "raw",
+        trigger_window: int = 3,
+        trigger_min_samples: Optional[int] = None,
+        trigger_alpha: float = 0.3,
+        trigger_stable_only: bool = False,
     ) -> None:
         """
         Event 計測の用の煩雑な手続きを省略するメソッド
 
         Args:
-            topic:
-            threshold:
-            above:
-            once:
+            topic (str): gRPC-Event につける名前
+            threshold_g (float): 閾値
+            above (bool): 閾値の上(True) or した(False)
+            once (bool): Event が一回終わったら Arm 終わるか？(true) そのまま続けるか？
+
+            trigger_mode (str): raw / mean / median / ema
+            trigger_window (int): 平均/中央値の窓サイズ
+            trigger_min_samples (Optional[int]): 判定に必要な最小サンプル数
+            trigger_alpha (float): EMA 係数
+            trigger_stable_only (bool): True の場合 ST のみを判定に使う
 
         Returns:
-
         """
         self.stream_start()
 
@@ -74,7 +85,16 @@ class AanddReaderGrpcClient(GrpcClient):
             topic=topic,
         )
 
-        self.event_arm()
+        # --- trigger mode 設定 ---
+        self.set_trigger_mode(
+            mode=trigger_mode,
+            window=trigger_window,
+            min_samples=trigger_min_samples,
+            alpha=trigger_alpha,
+            stable_only=trigger_stable_only,
+        )
+
+        self.event_arm(once=once)
 
         self._event_topic = topic
         self._event_once = once
