@@ -106,12 +106,15 @@ class AanddReader:
 
     def __del__(self):
         try:
-            self.close()
+            self._close()
         except Exception as e:
             pass
 
-    def close(self) -> None:
-        """ストリーム停止とシリアルクローズを確実に行う"""
+    def _close(self) -> None:
+        """
+        ストリーム停止とシリアルクローズを確実に行う
+        gRPC からもし使うときに gRPC側の close() とかぶるので名前を変えておく
+        """
         try:
             self.stream_stop()
         except Exception:
