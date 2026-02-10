@@ -1,6 +1,32 @@
 """
 K.NAKADA, kengo.nakada@gmail.com/kengo.nakada@mat.shimane-u.ac.jp
-基本トライ　ACK なしにする(出荷時)
+
+返信メッセージの形式
+
+- ACK なし(出荷時)
+- ACK あり(現在)
+
+PRT モードとデーター取得について
+
+PRT は **「データ出力（Serial Print）の自動出力条件」**
+天秤が“自分の判断で”出力を送るタイミングの設定であり、
+Q/S/SIR などの“コマンド要求”とは別軸となる
+
+1	Auto print A（基準=ゼロ）	安定＋条件成立で自動出力
+2	Auto print B（基準=前回の安定値）	安定＋条件成立で自動出力
+3	Stream mode	連続出力（表示更新周期に依存）
+4	Key mode B	PRINTキーを押すと出力（安定不要）
+5	Key mode C	PRINTキーで出力（安定なら即、非安定なら待つ）
+6	Interval mode	一定間隔で周期出力( mode3 との違いに注意)
+
+--- 上記は結果をシリアルに流すので、コマンドで値要求(Q/S/SIR)と
+混ざるとどの応答をシリアルで捉えているのか分かりにくい
+STREAM MODE の測定周期は天秤側に設定する必要がある
+
+コマンド出力(Q/S/SIR)
+PCからのコマンドに対して天秤が返す出力
+SIR は readline のストリームに流す。
+
 """
 
 from typing import Any, Dict, List, Optional, Union, Tuple, Callable, Sequence
@@ -100,12 +126,29 @@ class AanddReader:
         self._event_threshold_g: Optional[float] = None
         self._event_once: bool = True
         self._event_armed: bool = False
+
+        self._event_above: bool = True
         # ----------------------------------
 
     def __del__(self):
         try:
-            self._ser.close()
+            self._close()
         except Exception as e:
+            pass
+
+    def _close(self) -> None:
+        """
+        ストリーム停止とシリアルクローズを確実に行う
+        gRPC からもし使うときに gRPC側の close() とかぶるので名前を変えておく
+        """
+        try:
+            self.stream_stop()
+        except Exception:
+            pass
+
+        try:
+            self._ser.close()
+        except Exception:
             pass
 
     # ---------------------------
@@ -190,27 +233,26 @@ class AanddReader:
         即時計測する
         Returns:
         """
+        # --- ストリームが動いているなら、必ず最新のストリーム値を返す ---
+        thread_obj = self._stream_thread
+        if thread_obj is not None and thread_obj.is_alive():
+            # 初回値がまだなら短時間だけ待つ
+            wait_sec = self._timeout if self._timeout is not None else 0.5
+            t0 = time.time()
+            while self._weight is None and (time.time() - t0) < wait_sec:
+                time.sleep(0.01)
+            return self._weight
+
+        # --- 通常の Q/S 測定 ---
         mode_val = mode
         if mode_val is None:
             mode_val = self._meas_mode
 
-        self._logger.debug(f"[Meas] mode = {mode_val}")
-
         if mode_val.upper() == "Q":
-            q_val = self._q()
-            if isinstance(q_val, bool):
-                return False
-            if isinstance(q_val, float):
-                return q_val
-            return False
+            return self._q()
 
         if mode_val.upper() == "S":
-            s_val = self._s()
-            if isinstance(s_val, bool):
-                return False
-            if isinstance(s_val, float):
-                return s_val
-            return False
+            return self._s()
 
         return False
 
@@ -218,125 +260,12 @@ class AanddReader:
     # Device Ctrl Driver
     # ---------------------------------
 
-    # def _r(
-    #     self,
-    # ) -> Union[str, bool]:
-    #     """reset
-    #     reset 後、測定するには 0.5 s くらい待たないとダメ
-    #     """
-    #     if self._ser is None:
-    #         # raise RuntimeError("Serial port is not opened.")
-    #         self._logger.error("Serial port is not opened.")
-    #         return False
-
-    #     self._ser.reset_input_buffer()
-    #     self._ser.write(b"R\r\n")
-
-    #     try:
-    #         line = self._ser.readline()
-    #     except Exception as e:
-    #         self._logger.error(f"**Error**: {e}")
-    #         return False
-
-    #     if len(line) == 0:
-    #         self._logger.error("**Error**: No data received.")
-    #         return False
-
-    #     return line[0] == 0x06
-
-    # def _s(
-    #     self,
-    # ) -> Union[bool, Union[str, float, None]]:
-    #     """
-    #     Q, 安定後、データ取得
-
-    #     Returns:
-    #     """
-    #     if self._ser is None:
-    #         self._logger.error("Serial port is not opened.")
-    #         return False
-
-    #     self._ser.reset_input_buffer()
-
-    #     try:
-    #         self._ser.write(b"S\r\n")
-    #         line = self._ser.readline()
-    #     except Exception as e:
-    #         self._logger.error(f"**Error**: {e}")
-    #         return False
-
-    #     if len(line) == 17:
-    #         line = line.rstrip()
-    #         try:
-    #             self._status: Optional[str] = str(
-    #                 line[0:2].decode()
-    #             )  # 測定状態(ST:安定)
-    #             self._weight: Optional[float] = float(line[3:12].decode())
-    #             self._unit: Optional[str] = str(line[12:15].decode().strip())
-    #         except Exception as e:
-    #             self._logger.error(f"**Error**: {e}")
-    #             self._logger.error(f"line: {line}")
-    #             return False
-    #     else:
-    #         self._logger.error(line)
-    #         return False
-    #     return self._weight
-
-    # def _q(
-    #     self,
-    # ) -> Union[bool, Union[float, Tuple[str, str, str]]]:
-    #     """
-    #     Q, 即時
-
-    #     Returns:
-    #     """
-    #     if self._ser is None:
-    #         self._logger.error("Serial port is not opened.")
-    #         return False
-    #     self._ser.reset_input_buffer()
-
-    #     try:
-    #         self._ser.write(b"Q\r\n")
-    #         line = self._ser.readline()
-    #     except Exception as e:
-    #         self._logger.error(f"**Error(readline)**: {e}")
-    #         return False
-
-    #     if b"EC,E02" in line:
-    #         # 計測時間が短くて前回の命令動作を本体足しているときなど
-    #         self._logger.error(f"**Error(EC, E02)**: {line}")
-    #         self._logger.error(
-    #             f"計測時間が短くて前回の命令動作を本体足している可能性があります"
-    #         )
-    #         return False
-
-    #     if len(line) == 17:
-    #         line = line.rstrip()
-    #         try:
-    #             self._status: Optional[str] = str(
-    #                 line[0:2].decode()
-    #             )  # 測定状態(ST:安定)
-    #             self._weight: Optional[float] = float(line[3:12].decode())
-    #             self._unit: Optional[str] = str(line[12:15].decode().strip())
-    #         except Exception as e:
-    #             self._logger.error(f"**Error(line==17)**: {e}")
-    #             self._logger.error(f"line: {line}")
-    #             return False
-    #     else:
-    #         self._logger.error(f"**Error(len(line)!=17)**: {line}")
-    #         self._logger.error(
-    #             f"返信メッセージが正しくない可能性があります。たとえば「空」の可能性です"
-    #         )
-    #         self._logger.error(f"計測モードなどのパラメーターを疑ってください")
-    #         self._logger.error(f"line: {line}")
-    #         return False
-
-    #     return self._weight
-
     def _r(
         self,
     ) -> Union[str, bool]:
         """reset
+        ACK前提
+
         reset 後、測定するには 0.5 s くらい待たないとダメ
         """
         self._logger.debug(f"[Serial] Reset(): _r")
@@ -365,6 +294,8 @@ class AanddReader:
         self,
     ) -> Union[bool, float]:
         """
+        ACKモード前提
+
         Q, 安定後、データ取得
 
         Returns:
@@ -397,6 +328,8 @@ class AanddReader:
         self,
     ) -> Union[bool, float]:
         """
+        ACKモード前提
+
         Q, 即時
 
         Returns:
@@ -440,19 +373,16 @@ class AanddReader:
     def _stream(self) -> Union[bool, float]:
         """
         ストリームデータを1行読む
+        Q/S や SIR もしくは PRT の各モードも readline に値を書き出す
+        ので、どれがどれに対応しているのあわからなくなるので
 
-        1/10d
-        sample
+        Q/S で使うとき
+        SIR で readline を loop で撮り続ける
 
-        1. 長押し(2sec)
-        2. bASFnc (分類項目) 1/10d 押すたびに変わる
-           ...
-
-        オートプリントモードA 設定
-        --> dout
-        --> Prt
-        --> Prt 1  (一回目を押したら、Aモード(1)に変更
-
+        をきちんと区別して使い分けないとおかしいことになる。
+        また、PRT の各モードは上記のコマンドベースにキックされて　readline に
+        流れる以外にPRTの各機能でそれぞれの周期やボタンで readline にデーターを
+        流すので Q/S/SIR を使う時は PRT を 0 にしておかないと訳がわからなくなる。
         """
         if self._ser is None:
             self._logger.error("Serial port is not opened.")
@@ -464,8 +394,18 @@ class AanddReader:
             self._logger.error(f"**Error**: {e}")
             return False
 
+        # SIR だとタイムアウトで空行は起こり得るので無視
         if not line:
-            self._logger.error("No data received.")
+            # self._logger.error("No data received.")
+            return False
+
+        # SIRの失敗は EC,Exx が返る
+        if line.startswith(b"EC,"):
+            self._logger.error(f"**Error(EC)**: {line!r}")
+            return False
+
+        # erCd=1 の場合、各コマンドに ACK(0x06) が返るため無視
+        if line == b"\x06":
             return False
 
         parsed = self._parse_measure_line(line)
@@ -503,26 +443,47 @@ class AanddReader:
         return status, weight, unit
 
     # ----------------------------
-    # for Event
+    # for Event (gRPC and thread)
     # ----------------------------
 
     def _set_event_bus(self, event_bus: Any) -> None:
+        """
+        gRPC の event による制御が回るように gRPC のイベントを挿入
+        """
         with self._lock:
             self._event_bus = event_bus
 
-    def event_arm(
+    def event_set_config(
         self,
         *,
         topic: str,
         threshold_g: float,
-        once: bool = True,
+        above: bool = True,
     ) -> bool:
         """
-        Event を使って閾値を超えたときに(主にgRPCから) 使われるフラグ制御
+        Event 条件の設定だけを行う。
+        設定後、event_arm() で armed を有効化する。
         """
         with self._lock:
             self._event_topic = topic
             self._event_threshold_g = float(threshold_g)
+            self._event_above = bool(above)
+        return True
+
+    def event_arm(
+        self,
+        *,
+        once: bool = True,
+    ) -> bool:
+        """
+        Event の armed フラグを立てる。
+        topic/threshold は event_set_config() で先に設定する。
+        """
+        with self._lock:
+            if self._event_topic is None:
+                return False
+            if self._event_threshold_g is None:
+                return False
             self._event_once = bool(once)
             self._event_armed = True
         return True
@@ -550,6 +511,8 @@ class AanddReader:
         return True
 
     def stream_stop(self) -> bool:
+        """"""
+        # stream_loop での thread停止をするために thread-event set する
         with self._lock:
             self._stream_stop_event.set()
 
@@ -557,6 +520,14 @@ class AanddReader:
         with self._lock:
             thread_obj = self._stream_thread
 
+        # 念の為 SIRの停止コマンド
+        try:
+            if self._ser is not None:
+                self._ser.write(b"C\r\n")
+        except Exception:
+            pass
+
+        # loop で readline 取得を止める
         if thread_obj is not None:
             try:
                 thread_obj.join(timeout=2.0)
@@ -569,13 +540,45 @@ class AanddReader:
         return True
 
     def _stream_loop(self) -> None:
+        """
+        1. stream_start() でスレッド起動
+        2. _stream_loop の先頭で SIR を送る
+        3. readline() で連続取得
+        4. stream_stop() で停止フラグ
+        5. _stream_loop 側で C を送って終了
+
+        Returns:
+
+        """
+        # --- SIR 開始 ---
+        if self._ser is None:
+            self._logger.error("Serial port is not opened.")
+            return
+
+        try:
+            self._ser.reset_input_buffer()
+            self._ser.write(b"SIR\r\n")  # 連続データ要求
+        except Exception as e:
+            self._logger.error(f"**Error(SIR start)**: {e}")
+            return
+
+        # SIR開始直後の1行目はゴミになることがあるので捨てる
+        try:
+            _ = self._ser.readline()
+        except Exception:
+            pass
+
         while True:
             if self._stream_stop_event.is_set():
+                try:
+                    self._ser.write(b"C\r\n")  # SIR 停止
+                except Exception:
+                    pass
                 return
 
             stream_val = self._stream()
             if isinstance(stream_val, bool):
-                time.sleep(0.05)
+                time.sleep(0.01)
                 continue
 
             weight_val = float(stream_val)
@@ -602,7 +605,6 @@ class AanddReader:
             if threshold_g is None:
                 continue
 
-            # 閾値を超えたときには Event_bus に流す
             if weight_val >= float(threshold_g):
                 payload: Dict[str, Any] = {
                     "weight_g": weight_val,

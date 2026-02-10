@@ -15,7 +15,7 @@ from grpc import channel_ready_future
 
 from grpc_frame.grpc_server import create_grpc_server
 
-from aandd_reader import AanddReader
+from aandd_reader.aandd_reader import AanddReader
 from x_logger import XLogger
 
 
@@ -81,6 +81,10 @@ def aandd_reader_server(
     finally:
         server.stop(grace=None)
         logger.info("gRPC server stopped")
+        try:
+            ctrl.close()
+        except Exception as e:
+            pass
 
 
 if __name__ == "__main__":
