@@ -4,11 +4,10 @@ from __future__ import annotations
 # import asyncio
 # import functools
 from typing import Any, Optional, Callable
+from grpc_frame.grpc_client import AsyncGrpcClient
 
 
-class AsyncGrpcClient(
-    grpc_frame.grpc_client.AsyncGrpcClient,
-):
+class AsyncAanddReaderGrpcClient(AsyncGrpcClient):
     """
     擬似 async 版 GrpcClient（内部は sync gRPC をスレッド実行）
     """
