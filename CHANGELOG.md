@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026.02.04 v0.2.4, nakada
+
+- async 対応版
+
 ## 2026.02.04 v0.2.3, nakada
 
 - server/start (example側) script のバグ修正
