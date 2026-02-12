@@ -107,3 +107,22 @@ class AanddReaderGrpcClient(GrpcClient):
 
         for event in self.subscribe(topic=topic, once=True):
             return event
+
+
+class SyncAanddReaderGrpcClient(AanddReaderGrpcClient):
+    def __init__(
+        self,
+        config: Optional[Any] = None,
+        server_ip: Optional[str] = None,
+        server_port: Optional[int] = None,
+        timeout_sec: Optional[float] = None,
+        logger: Optional[Any] = None,
+        log_level: Optional[str] = None,
+    ) -> None:
+        super().__init__(
+            server_ip=server_ip,
+            server_port=server_port,
+            timeout_sec=timeout_sec,
+            logger=logger,
+            log_level=log_level,
+        )
