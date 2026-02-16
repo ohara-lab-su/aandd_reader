@@ -7,10 +7,10 @@ from aandd_reader.server_fastapi.clients.async_aandd_reader_client import (
 )
 
 # FastAPI Server
-from aandd_reader.server_fastapi.routers.aandd_reader_router import AanddReaderRouter
+# from aandd_reader.server_fastapi.routers.aandd_reader_router import AanddReaderRouter
 
 # gRPC Server
-from aandd_reader.server_grpc.aandd_reader_grpc_server import aandd_reader_server
+# from aandd_reader.server_grpc.aandd_reader_grpc_server import aandd_reader_server
 
 # gRPC Client
 from aandd_reader.server_grpc.aandd_reader_grpc_client import AanddReaderGrpcClient
