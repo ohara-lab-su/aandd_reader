@@ -42,9 +42,9 @@ autosummary_generate = True
 
 # 型ヒント参照で失敗した時の警告を抑制する
 nitpick_ignore = [
-    ("py:class", "fastapi_frame.clients.async_device_client.AsyncDeviceClient"),
-    ("py:class", "fastapi_frame.clients.sync_device_client.SyncDeviceClient"),
-    ("py:class", "fastapi_frame.routers.device_router.DeviceRouter"),
+    ("py:class", "ese774_frame.clients.async_device_client.AsyncDeviceClient"),
+    ("py:class", "ese774_frame.clients.sync_device_client.SyncDeviceClient"),
+    ("py:class", "ese774_frame.routers.device_router.DeviceRouter"),
     ("py:class", "x_logger.x_logger.XLogger"),
     ("py:class", "Path"),
     ("py:class", "pathlib.Path"),

@@ -4,7 +4,7 @@ Kengo NAKADA:
 https://github.com/shimane-dev, https://github.com/kengo-nakada
 kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 """
-from fastapi_frame.models.api_spec import ApiSpec
+from ese774_frame.models.api_spec import ApiSpec
 
 # SPEC
 from aandd_reader.server_fastapi.models.comman import (

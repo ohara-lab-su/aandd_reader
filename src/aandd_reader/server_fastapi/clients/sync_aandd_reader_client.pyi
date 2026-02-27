@@ -2,19 +2,30 @@ from typing import Optional, Any, overload, Union
 import httpx
 from aandd_reader.server_fastapi.models.comman import SetMeasModeRequest
 from builtins import str
-from fastapi_frame.clients.sync_device_client import SyncDeviceClient
+from ese774_frame.clients.sync_device_client import SyncDeviceClient
+
 class SyncAanddReaderClient(SyncDeviceClient):
     _client: httpx.Client
     _logger: Any
     _base_url: str
     _api_spec: list = None
-    def __init__(self, config: Any = ..., server_ip: str = ..., server_port: int = ..., base_url: str = ..., api_spec: Optional[list] = None, logger: Optional[Any] = None, log_level: str = ..., object_name: str = ...): ...
+    def __init__(
+        self,
+        config: Any = ...,
+        server_ip: str = ...,
+        server_port: int = ...,
+        base_url: str = ...,
+        api_spec: Optional[list] = None,
+        logger: Optional[Any] = None,
+        log_level: str = ...,
+        object_name: str = ...,
+    ): ...
     def _post(self, url, **kwargs) -> Any: ...
     def dispatch(self, method: str, *args, **kwargs) -> Any: ...
     def _register_api_spec_methods(self) -> None: ...
     def _make_api_method(self, api) -> Any: ...
     # get_status()
-    # 
+    #
     @overload
     def get_status(self) -> Any: ...
     @overload
@@ -22,7 +33,7 @@ class SyncAanddReaderClient(SyncDeviceClient):
     @overload
     def get_status(self, *args, **kwargs) -> Any: ...
     # get_unit()
-    # 
+    #
     @overload
     def get_unit(self) -> Any: ...
     @overload

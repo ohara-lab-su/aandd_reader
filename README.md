@@ -20,7 +20,7 @@ from aandd_reader.aandd_reader import AanddReader
 from aandd_reader.server_fastapi.routers import AanddReaderRouter
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
 
-from fastapi_frame.api_server import FastApiServer
+from ese774_frame.api_server import FastApiServer
 from x_logger.x_logger import XLogger
 
 
