@@ -11,7 +11,7 @@ from aandd_reader.aandd_reader import AanddReader
 from aandd_reader.server_fastapi.routers import AanddReaderRouter
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
 
-from fastapi_frame.api_server import FastApiServer
+from ese774_frame.api_server import FastApiServer
 from x_logger.x_logger import XLogger
 
 
@@ -35,7 +35,9 @@ if __name__ == "__main__":
         router_cls=AanddReaderRouter,  # routerクラス
         config=Config,
         api_spec=aandd_reader_api_spec,
-        device_kwargs={"port": Config.DEVICE_PORT},  # COBOTTA制御Classのコンストラクタ引数)
+        device_kwargs={
+            "port": Config.DEVICE_PORT
+        },  # COBOTTA制御Classのコンストラクタ引数)
         logger=logger,
         logger_name=Config.SERVER_LOGGER_NAME,  # LOGGER_NAME
         lifespan_msg_prefix="AANDD",

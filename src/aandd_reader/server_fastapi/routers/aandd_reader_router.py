@@ -8,7 +8,7 @@ import re
 from typing import Union, Optional, Set, Any
 from pathlib import Path
 
-from fastapi_frame.routers.device_router import DeviceRouter
+from ese774_frame.routers.device_router import DeviceRouter
 from x_logger.x_logger import XLogger
 
 

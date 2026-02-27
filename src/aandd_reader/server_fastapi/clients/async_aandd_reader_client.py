@@ -18,7 +18,7 @@ from aandd_reader.server_fastapi.models.comman import (
     ResultResponse,
 )
 
-from fastapi_frame.clients.async_device_client import AsyncDeviceClient
+from ese774_frame.clients.async_device_client import AsyncDeviceClient
 
 
 class AsyncAanddReaderClient(AsyncDeviceClient):

@@ -3,19 +3,30 @@ import httpx
 from httpx import Response
 from aandd_reader.server_fastapi.models.comman import SetMeasModeRequest
 from builtins import str
-from fastapi_frame.clients.async_device_client import AsyncDeviceClient
+from ese774_frame.clients.async_device_client import AsyncDeviceClient
+
 class AsyncAanddReaderClient(AsyncDeviceClient):
     _client: httpx.AsyncClient
     _logger: Any
     _base_url: str
     _api_spec: list = None
-    def __init__(self, config: Any = ..., server_ip: str = ..., server_port: int = ..., base_url: str = ..., api_spec: Optional[list] = None, logger: Optional[Any] = None, log_level: str = ..., object_name: str = ...): ...
+    def __init__(
+        self,
+        config: Any = ...,
+        server_ip: str = ...,
+        server_port: int = ...,
+        base_url: str = ...,
+        api_spec: Optional[list] = None,
+        logger: Optional[Any] = None,
+        log_level: str = ...,
+        object_name: str = ...,
+    ): ...
     async def _post(self, url, **kwargs) -> Any: ...
     async def dispatch(self, method: str, *args, **kwargs) -> Any: ...
     def _register_api_spec_methods(self) -> None: ...
     def _make_api_method(self, api) -> Any: ...
     # get_status()
-    # 
+    #
     @overload
     async def get_status(self) -> Any: ...
     @overload
@@ -23,7 +34,7 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
     @overload
     async def get_status(self, *args, **kwargs) -> Any: ...
     # get_unit()
-    # 
+    #
     @overload
     async def get_unit(self) -> Any: ...
     @overload
@@ -79,5 +90,11 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
     # --- methods defined in .py (pyi が .py を隠すため明示) ---
     @staticmethod
     def _sync_await(coro) -> Any: ...
-    async def start_watch_listener(self, threshold: float, hysteresis: float, on_event: Any, timeout_sec: float = ...) -> Any: ...
+    async def start_watch_listener(
+        self,
+        threshold: float,
+        hysteresis: float,
+        on_event: Any,
+        timeout_sec: float = ...,
+    ) -> Any: ...
     async def stop_watch_listener(self, watch_id: str) -> Any: ...
