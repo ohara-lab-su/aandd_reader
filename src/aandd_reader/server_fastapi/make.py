@@ -18,11 +18,11 @@ import os
 from contextlib import contextmanager
 
 # make
-from fastapi_frame.routers.make_pyi_device_router import (
+from ese774_frame.routers.make_pyi_device_router import (
     make_pyi_device_router,
 )
 
-from fastapi_frame.clients.make_pyi_device_client import (
+from ese774_frame.clients.make_pyi_device_client import (
     make_pyi_device_client,
 )
 
@@ -119,7 +119,7 @@ with chdir("clients"):
 
     _patch_pyi_inheritance_and_extras(
         filename="async_aandd_reader_client.pyi",
-        base_import_line="from fastapi_frame.clients.async_device_client import AsyncDeviceClient",
+        base_import_line="from ese774_frame.clients.async_device_client import AsyncDeviceClient",
         class_name="AsyncAanddReaderClient",
         base_class_name="AsyncDeviceClient",
         extra_method_lines=[
@@ -143,7 +143,7 @@ with chdir("clients"):
     # つまり API spec に載っていない時前メソッドを pyi についか
     _patch_pyi_inheritance_and_extras(
         filename="sync_aandd_reader_client.pyi",
-        base_import_line="from fastapi_frame.clients.sync_device_client import SyncDeviceClient",
+        base_import_line="from ese774_frame.clients.sync_device_client import SyncDeviceClient",
         class_name="SyncAanddReaderClient",
         base_class_name="SyncDeviceClient",
         extra_method_lines=[],

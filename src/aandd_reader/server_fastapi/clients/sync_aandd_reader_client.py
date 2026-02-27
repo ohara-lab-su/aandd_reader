@@ -7,7 +7,7 @@ kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 from typing import Any
 from aandd_reader.config import Config
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
-from fastapi_frame.clients.sync_device_client import SyncDeviceClient
+from ese774_frame.clients.sync_device_client import SyncDeviceClient
 
 
 class SyncAanddReaderClient(
