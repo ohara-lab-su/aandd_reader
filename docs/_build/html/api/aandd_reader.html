@@ -1,0 +1,652 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aandd_reader package &mdash; Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="aandd_reader.server_fastapi package" href="aandd_reader.server_fastapi.html" />
+    <link rel="prev" title="aandd_reader" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">aandd_reader</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">aandd_reader package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.html">aandd_reader.server_fastapi package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_grpc.html">aandd_reader.server_grpc package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-aandd_reader.aandd_reader">aandd_reader.aandd_reader module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#aandd_reader.aandd_reader.AanddReader"><code class="docutils literal notranslate"><span class="pre">AanddReader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-aandd_reader.config">aandd_reader.config module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#aandd_reader.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/intro.html">チュートリアル</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">aandd_reader</a></li>
+      <li class="breadcrumb-item active">aandd_reader package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/aandd_reader.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-aandd_reader">
+<span id="aandd-reader-package"></span><h1>aandd_reader package<a class="headerlink" href="#module-aandd_reader" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="aandd_reader.server_fastapi.html">aandd_reader.server_fastapi package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_fastapi.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_fastapi.clients.html">aandd_reader.server_fastapi.clients package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.clients.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.clients.html#module-aandd_reader.server_fastapi.clients.async_aandd_reader_client">aandd_reader.server_fastapi.clients.async_aandd_reader_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.clients.html#module-aandd_reader.server_fastapi.clients.sync_aandd_reader_client">aandd_reader.server_fastapi.clients.sync_aandd_reader_client module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_fastapi.models.html">aandd_reader.server_fastapi.models package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.models.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.models.html#module-aandd_reader.server_fastapi.models.comman">aandd_reader.server_fastapi.models.comman module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_fastapi.routers.html">aandd_reader.server_fastapi.routers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.routers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_fastapi.routers.html#module-aandd_reader.server_fastapi.routers.aandd_reader_router">aandd_reader.server_fastapi.routers.aandd_reader_router module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_fastapi.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_fastapi.html#aandd-reader-server-fastapi-make-module">aandd_reader.server_fastapi.make module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_fastapi.html#module-aandd_reader.server_fastapi.spec_ctrl">aandd_reader.server_fastapi.spec_ctrl module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="aandd_reader.server_grpc.html">aandd_reader.server_grpc package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_grpc.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_grpc.html#module-aandd_reader.server_grpc.aandd_reader_grpc_client">aandd_reader.server_grpc.aandd_reader_grpc_client module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.aandd_reader_grpc_client.AanddReaderGrpcClient"><code class="docutils literal notranslate"><span class="pre">AanddReaderGrpcClient</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.aandd_reader_grpc_client.AanddReaderGrpcClient.prepare_event_measurement"><code class="docutils literal notranslate"><span class="pre">AanddReaderGrpcClient.prepare_event_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.aandd_reader_grpc_client.AanddReaderGrpcClient.wait_event"><code class="docutils literal notranslate"><span class="pre">AanddReaderGrpcClient.wait_event()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.aandd_reader_grpc_client.SyncAanddReaderGrpcClient"><code class="docutils literal notranslate"><span class="pre">SyncAanddReaderGrpcClient</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_grpc.html#module-aandd_reader.server_grpc.aandd_reader_grpc_server">aandd_reader.server_grpc.aandd_reader_grpc_server module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.aandd_reader_grpc_server.aandd_reader_server"><code class="docutils literal notranslate"><span class="pre">aandd_reader_server()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_grpc.html#module-aandd_reader.server_grpc.async_aandd_reader_grpc_client">aandd_reader.server_grpc.async_aandd_reader_grpc_client module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.async_aandd_reader_grpc_client.AsyncAanddReaderGrpcClient"><code class="docutils literal notranslate"><span class="pre">AsyncAanddReaderGrpcClient</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.async_aandd_reader_grpc_client.AsyncAanddReaderGrpcClient.prepare_event_measurement"><code class="docutils literal notranslate"><span class="pre">AsyncAanddReaderGrpcClient.prepare_event_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.async_aandd_reader_grpc_client.AsyncAanddReaderGrpcClient.wait_event"><code class="docutils literal notranslate"><span class="pre">AsyncAanddReaderGrpcClient.wait_event()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aandd_reader.server_grpc.html#module-aandd_reader.server_grpc.make_pyi">aandd_reader.server_grpc.make_pyi module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aandd_reader.server_grpc.html#aandd_reader.server_grpc.make_pyi.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-aandd_reader.aandd_reader">
+<span id="aandd-reader-aandd-reader-module"></span><h2>aandd_reader.aandd_reader module<a class="headerlink" href="#module-aandd_reader.aandd_reader" title="Link to this heading"></a></h2>
+<p>K.NAKADA, <a class="reference external" href="mailto:kengo&#46;nakada&#37;&#52;&#48;gmail&#46;com/kengo">kengo<span>&#46;</span>nakada<span>&#64;</span>gmail<span>&#46;</span>com/kengo</a>.nakada&#64;mat.shimane-u.ac.jp</p>
+<p>返信メッセージの形式</p>
+<ul class="simple">
+<li><p>ACK なし(出荷時)</p></li>
+<li><p>ACK あり(現在)</p></li>
+</ul>
+<p>PRT モードとデーター取得について</p>
+<p>PRT は <strong>「データ出力（Serial Print）の自動出力条件」</strong>
+天秤が“自分の判断で”出力を送るタイミングの設定であり、
+Q/S/SIR などの“コマンド要求”とは別軸となる</p>
+<p>1       Auto print A（基準=ゼロ）     安定＋条件成立で自動出力
+2       Auto print B（基準=前回の安定値） 安定＋条件成立で自動出力
+3       Stream mode     連続出力（表示更新周期に依存）</p>
+<blockquote>
+<div><p>SIR と実施的には同じである
+SIR はコマンドでスタートをキックできる PTR3 は開始したら動きっぱなし
+どちらも readline で値を読み続けることができる
+<a href="#id1"><span class="problematic" id="id2">*</span></a>) 測定可能なサイクルは 5pd で、 5/10/20 回/秒設定が可能</p>
+<blockquote>
+<div><p>SAMPLE-key --&gt; ba5fnc</p>
+</div></blockquote>
+</div></blockquote>
+<p>4       Key mode B      PRINTキーを押すと出力（安定不要）
+5       Key mode C      PRINTキーで出力（安定なら即、非安定なら待つ）
+6       Interval mode   一定間隔で周期出力( mode3 との違いに注意)</p>
+<p>--- 上記は結果をシリアルに流すので、コマンドで値要求(Q/S/SIR)と
+混ざるとどの応答をシリアルで捉えているのか分かりにくい
+STREAM MODE の測定周期は天秤側に設定する必要がある</p>
+<p>コマンド出力(Q/S/SIR)
+PCからのコマンドに対して天秤が返す出力
+SIR は readline のストリームに流す。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">AanddReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="simple">
+<dt>通信速度</dt><dd><dl class="simple">
+<dt>天秤の 内部設定</dt><dd><p>bPS (ボーレート) 19200bps</p>
+</dd>
+</dl>
+</dd>
+<dt>全てのコマンドに対しての何らかの応答(ACK)を返すモードであるのが前提</dt><dd><dl class="simple">
+<dt>天秤の 内部設定</dt><dd><p>SF(シリアルインターフェース)
+ErCd 1 (出力する AK,コード)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>baud_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>log_level</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._calc_trigger_value">
+<span class="sig-name descname"><span class="pre">_calc_trigger_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight_val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._calc_trigger_value"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._calc_trigger_value" title="Link to this definition"></a></dt>
+<dd><p>トリガ判定に使う値を計算する。
+None を返した場合は判定をスキップする。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>weight_val</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._close">
+<span class="sig-name descname"><span class="pre">_close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._close"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._close" title="Link to this definition"></a></dt>
+<dd><p>ストリーム停止とシリアルクローズを確実に行う
+gRPC からもし使うときに gRPC側の close() とかぶるので名前を変えておく</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._parse_measure_line">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_parse_measure_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._parse_measure_line"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._parse_measure_line" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._q">
+<span class="sig-name descname"><span class="pre">_q</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._q"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._q" title="Link to this definition"></a></dt>
+<dd><p>ACKモード前提</p>
+<p>Q, 即時</p>
+<p>Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._r">
+<span class="sig-name descname"><span class="pre">_r</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._r"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._r" title="Link to this definition"></a></dt>
+<dd><p>reset
+ACK前提</p>
+<p>reset 後、測定するには 0.5 s くらい待たないとダメ</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._s">
+<span class="sig-name descname"><span class="pre">_s</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._s"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._s" title="Link to this definition"></a></dt>
+<dd><p>ACKモード前提</p>
+<p>Q, 安定後、データ取得</p>
+<p>Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._set_event_bus">
+<span class="sig-name descname"><span class="pre">_set_event_bus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_bus</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._set_event_bus"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._set_event_bus" title="Link to this definition"></a></dt>
+<dd><p>gRPC の event による制御が回るように gRPC のイベントを挿入</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_bus</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._stream">
+<span class="sig-name descname"><span class="pre">_stream</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._stream"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._stream" title="Link to this definition"></a></dt>
+<dd><p>ストリームデータを1行読む
+Q/S や SIR もしくは PRT の各モードも readline に値を書き出す
+ので、どれがどれに対応しているのあわからなくなるので</p>
+<p>Q/S で使うとき
+SIR で readline を loop で撮り続ける</p>
+<p>をきちんと区別して使い分けないとおかしいことになる。
+また、PRT の各モードは上記のコマンドベースにキックされて　readline に
+流れる以外にPRTの各機能でそれぞれの周期やボタンで readline にデーターを
+流すので Q/S/SIR を使う時は PRT を 0 にしておかないと訳がわからなくなる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader._stream_loop">
+<span class="sig-name descname"><span class="pre">_stream_loop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader._stream_loop"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader._stream_loop" title="Link to this definition"></a></dt>
+<dd><ol class="arabic simple">
+<li><p>stream_start() でスレッド起動</p></li>
+<li><p>_stream_loop の先頭で SIR を送る</p></li>
+<li><p>readline() で連続取得</p></li>
+<li><p>stream_stop() で停止フラグ</p></li>
+<li><p>_stream_loop 側で C を送って終了</p></li>
+</ol>
+<p>Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.event_arm">
+<span class="sig-name descname"><span class="pre">event_arm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">once</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.event_arm"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.event_arm" title="Link to this definition"></a></dt>
+<dd><p>Event の armed フラグを立てる。
+topic/threshold は event_set_config() で先に設定する。</p>
+<p>armed を立てていると gRPC のイベントモードになるのでチェックする
+そのときに onece を入れていると、一回だけ閾値超え判定がある。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>once</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- イベントは一回のみ</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.event_disarm">
+<span class="sig-name descname"><span class="pre">event_disarm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.event_disarm"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.event_disarm" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.event_set_config">
+<span class="sig-name descname"><span class="pre">event_set_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">above</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.event_set_config"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.event_set_config" title="Link to this definition"></a></dt>
+<dd><p>Event 条件の設定だけを行う。
+設定後、event_arm() で armed を有効化する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>threshold_g</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>)</p></li>
+<li><p><strong>above</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.get_meas_mode">
+<span class="sig-name descname"><span class="pre">get_meas_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.get_meas_mode"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.get_meas_mode" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.get_serial_number">
+<span class="sig-name descname"><span class="pre">get_serial_number</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.get_serial_number"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.get_serial_number" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>?SN
+マニュアルには</p>
+</div></blockquote>
+<p>でも OK とあるが、
+が必須</p>
+<blockquote>
+<div><p>Returns:</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.get_status">
+<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.get_status"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.get_status" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.get_unit">
+<span class="sig-name descname"><span class="pre">get_unit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.get_unit"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.get_unit" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.get_weight">
+<span class="sig-name descname"><span class="pre">get_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.get_weight"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.get_weight" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.is_ack">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_ack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.is_ack"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.is_ack" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.meas">
+<span class="sig-name descname"><span class="pre">meas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.meas"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.meas" title="Link to this definition"></a></dt>
+<dd><p>Q
+即時計測する
+Returns:</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.reset"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.reset" title="Link to this definition"></a></dt>
+<dd><p>reset 後、測定するには 0.5 s くらい待たないとダメ</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.set_meas_mode">
+<span class="sig-name descname"><span class="pre">set_meas_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.set_meas_mode"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.set_meas_mode" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.set_trigger_mode">
+<span class="sig-name descname"><span class="pre">set_trigger_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raw'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stable_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.set_trigger_mode"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.set_trigger_mode" title="Link to this definition"></a></dt>
+<dd><p>streamイベントのトリガ値算出方法を設定する。</p>
+<p>mode=raw, stable_only=True で値が stable のものだけ閾値チェック</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- raw / mean / median / ema</p></li>
+<li><p><strong>window</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) -- 平均・中央値で使う窓サイズ</p></li>
+<li><p><strong>min_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>) -- 判定に必要な最小サンプル数（Noneならwindow）</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) -- EMA係数（0-1）</p></li>
+<li><p><strong>stable_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- TrueならST以外は無視</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.status">
+<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.status"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.status" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.stream_start">
+<span class="sig-name descname"><span class="pre">stream_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.stream_start"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.stream_start" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.stream_stop">
+<span class="sig-name descname"><span class="pre">stream_stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.stream_stop"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.stream_stop" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.aandd_reader.AanddReader.unit">
+<span class="sig-name descname"><span class="pre">unit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/aandd_reader.html#AanddReader.unit"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.aandd_reader.AanddReader.unit" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-aandd_reader.config">
+<span id="aandd-reader-config-module"></span><h2>aandd_reader.config module<a class="headerlink" href="#module-aandd_reader.config" title="Link to this heading"></a></h2>
+<p>Kengo NAKADA:
+<a class="reference external" href="https://github.com/shimane-dev">https://github.com/shimane-dev</a>, <a class="reference external" href="https://github.com/kengo-nakada">https://github.com/kengo-nakada</a>
+<a class="reference external" href="mailto:kengo&#46;nakada&#37;&#52;&#48;mat&#46;shimane-u&#46;ac&#46;jp">kengo<span>&#46;</span>nakada<span>&#64;</span>mat<span>&#46;</span>shimane-u<span>&#46;</span>ac<span>&#46;</span>jp</a>, <a class="reference external" href="mailto:kengo&#46;nakada&#37;&#52;&#48;gmail&#46;com">kengo<span>&#46;</span>nakada<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="aandd_reader.config.Config">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/config.html#Config"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.config.Config" title="Link to this definition"></a></dt>
+<dd><p>ベースクラス: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.CLIENT_LOGGER_NAME">
+<span class="sig-name descname"><span class="pre">CLIENT_LOGGER_NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AanddReaderClient'</span></span><a class="headerlink" href="#aandd_reader.config.Config.CLIENT_LOGGER_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.DEVICE_PORT">
+<span class="sig-name descname"><span class="pre">DEVICE_PORT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'COM2'</span></span><a class="headerlink" href="#aandd_reader.config.Config.DEVICE_PORT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.FASTAPI_PORT">
+<span class="sig-name descname"><span class="pre">FASTAPI_PORT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8004</span></span><a class="headerlink" href="#aandd_reader.config.Config.FASTAPI_PORT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.GRPC_PORT">
+<span class="sig-name descname"><span class="pre">GRPC_PORT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50051</span></span><a class="headerlink" href="#aandd_reader.config.Config.GRPC_PORT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.SERVER_IP">
+<span class="sig-name descname"><span class="pre">SERVER_IP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'10.170.10.38'</span></span><a class="headerlink" href="#aandd_reader.config.Config.SERVER_IP" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.SERVER_LOGGER_NAME">
+<span class="sig-name descname"><span class="pre">SERVER_LOGGER_NAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AanddReaderServer'</span></span><a class="headerlink" href="#aandd_reader.config.Config.SERVER_LOGGER_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.config.Config._load_yaml">
+<span class="sig-name descname"><span class="pre">_load_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/config.html#Config._load_yaml"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.config.Config._load_yaml" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aandd_reader.config.Config.load_yaml">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/config.html#Config.load_yaml"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.config.Config.load_yaml" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="aandd_reader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aandd_reader.server_fastapi.html" class="btn btn-neutral float-right" title="aandd_reader.server_fastapi package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
