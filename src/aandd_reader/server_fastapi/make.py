@@ -107,52 +107,58 @@ def _patch_pyi_inheritance_and_extras(
 #     )
 
 
-# === 変更: make.py の make_pyi 呼び出し部（差し替え） ===
-with chdir("clients"):
-    # Async client
-    make_pyi_device_client(
-        filename="async_aandd_reader_client.pyi",
-        api_spec=aandd_reader_api_spec,
-        class_name="AsyncAanddReaderClient",
-        async_mode=True,
-    )
+def main() -> None:
 
-    _patch_pyi_inheritance_and_extras(
-        filename="async_aandd_reader_client.pyi",
-        base_import_line="from ese774_frame.clients.async_device_client import AsyncDeviceClient",
-        class_name="AsyncAanddReaderClient",
-        base_class_name="AsyncDeviceClient",
-        extra_method_lines=[
-            "    # --- methods defined in .py (pyi が .py を隠すため明示) ---",
-            "    @staticmethod",
-            "    def _sync_await(coro) -> Any: ...",
-            "    async def start_watch_listener(self, threshold: float, hysteresis: float, on_event: Any, timeout_sec: float = ...) -> Any: ...",
-            "    async def stop_watch_listener(self, watch_id: str) -> Any: ...",
-        ],
-    )
+    # === 変更: make.py の make_pyi 呼び出し部（差し替え） ===
+    with chdir("clients"):
+        # Async client
+        make_pyi_device_client(
+            filename="async_aandd_reader_client.pyi",
+            api_spec=aandd_reader_api_spec,
+            class_name="AsyncAanddReaderClient",
+            async_mode=True,
+        )
 
-    # Sync client
-    make_pyi_device_client(
-        filename="sync_aandd_reader_client.pyi",
-        api_spec=aandd_reader_api_spec,
-        class_name="SyncAanddReaderClient",
-        async_mode=False,
-    )
+        _patch_pyi_inheritance_and_extras(
+            filename="async_aandd_reader_client.pyi",
+            base_import_line="from ese774_frame.clients.async_device_client import AsyncDeviceClient",
+            class_name="AsyncAanddReaderClient",
+            base_class_name="AsyncDeviceClient",
+            extra_method_lines=[
+                "    # --- methods defined in .py (pyi が .py を隠すため明示) ---",
+                "    @staticmethod",
+                "    def _sync_await(coro) -> Any: ...",
+                "    async def start_watch_listener(self, threshold: float, hysteresis: float, on_event: Any, timeout_sec: float = ...) -> Any: ...",
+                "    async def stop_watch_listener(self, watch_id: str) -> Any: ...",
+            ],
+        )
 
-    # 生成後の pyi を現実のクラス構造に合わせて補正する
-    # つまり API spec に載っていない時前メソッドを pyi についか
-    _patch_pyi_inheritance_and_extras(
-        filename="sync_aandd_reader_client.pyi",
-        base_import_line="from ese774_frame.clients.sync_device_client import SyncDeviceClient",
-        class_name="SyncAanddReaderClient",
-        base_class_name="SyncDeviceClient",
-        extra_method_lines=[],
-    )
+        # Sync client
+        make_pyi_device_client(
+            filename="sync_aandd_reader_client.pyi",
+            api_spec=aandd_reader_api_spec,
+            class_name="SyncAanddReaderClient",
+            async_mode=False,
+        )
 
-with chdir("routers"):
-    # router Device
-    make_pyi_device_router(
-        filename="aandd_reader_router.pyi",
-        api_spec=aandd_reader_api_spec,
-        class_name="AanddReaderRouter",
-    )
+        # 生成後の pyi を現実のクラス構造に合わせて補正する
+        # つまり API spec に載っていない時前メソッドを pyi についか
+        _patch_pyi_inheritance_and_extras(
+            filename="sync_aandd_reader_client.pyi",
+            base_import_line="from ese774_frame.clients.sync_device_client import SyncDeviceClient",
+            class_name="SyncAanddReaderClient",
+            base_class_name="SyncDeviceClient",
+            extra_method_lines=[],
+        )
+
+    with chdir("routers"):
+        # router Device
+        make_pyi_device_router(
+            filename="aandd_reader_router.pyi",
+            api_spec=aandd_reader_api_spec,
+            class_name="AanddReaderRouter",
+        )
+
+
+if __name__ == "__main__":
+    main()
