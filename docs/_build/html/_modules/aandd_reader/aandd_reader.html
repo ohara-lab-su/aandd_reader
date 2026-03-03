@@ -1,0 +1,968 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aandd_reader.aandd_reader &mdash; Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">aandd_reader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/aandd_reader.html">aandd_reader package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/aandd_reader.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/aandd_reader.server_fastapi.html">aandd_reader.server_fastapi package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/aandd_reader.server_grpc.html">aandd_reader.server_grpc package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/aandd_reader.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/aandd_reader.html#module-aandd_reader.aandd_reader">aandd_reader.aandd_reader module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader"><code class="docutils literal notranslate"><span class="pre">AanddReader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/aandd_reader.html#module-aandd_reader.config">aandd_reader.config module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/aandd_reader.html#aandd_reader.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/intro.html">チュートリアル</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">aandd_reader.aandd_reader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>aandd_reader.aandd_reader のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">K.NAKADA, kengo.nakada@gmail.com/kengo.nakada@mat.shimane-u.ac.jp</span>
+
+<span class="sd">返信メッセージの形式</span>
+
+<span class="sd">- ACK なし(出荷時)</span>
+<span class="sd">- ACK あり(現在)</span>
+
+<span class="sd">PRT モードとデーター取得について</span>
+
+<span class="sd">PRT は **「データ出力（Serial Print）の自動出力条件」**</span>
+<span class="sd">天秤が“自分の判断で”出力を送るタイミングの設定であり、</span>
+<span class="sd">Q/S/SIR などの“コマンド要求”とは別軸となる</span>
+
+<span class="sd">1	Auto print A（基準=ゼロ）	安定＋条件成立で自動出力</span>
+<span class="sd">2	Auto print B（基準=前回の安定値）	安定＋条件成立で自動出力</span>
+<span class="sd">3	Stream mode	連続出力（表示更新周期に依存）</span>
+<span class="sd">    SIR と実施的には同じである</span>
+<span class="sd">    SIR はコマンドでスタートをキックできる PTR3 は開始したら動きっぱなし</span>
+<span class="sd">    どちらも readline で値を読み続けることができる</span>
+<span class="sd">    *) 測定可能なサイクルは 5pd で、 5/10/20 回/秒設定が可能</span>
+<span class="sd">       SAMPLE-key --&gt; ba5fnc</span>
+<span class="sd">4	Key mode B	PRINTキーを押すと出力（安定不要）</span>
+<span class="sd">5	Key mode C	PRINTキーで出力（安定なら即、非安定なら待つ）</span>
+<span class="sd">6	Interval mode	一定間隔で周期出力( mode3 との違いに注意)</span>
+
+<span class="sd">--- 上記は結果をシリアルに流すので、コマンドで値要求(Q/S/SIR)と</span>
+<span class="sd">混ざるとどの応答をシリアルで捉えているのか分かりにくい</span>
+<span class="sd">STREAM MODE の測定周期は天秤側に設定する必要がある</span>
+
+<span class="sd">コマンド出力(Q/S/SIR)</span>
+<span class="sd">PCからのコマンドに対して天秤が返す出力</span>
+<span class="sd">SIR は readline のストリームに流す。</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">serial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+
+<div class="viewcode-block" id="AanddReader">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AanddReader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    通信速度</span>
+<span class="sd">        天秤の 内部設定</span>
+<span class="sd">            bPS (ボーレート) 19200bps</span>
+
+<span class="sd">    全てのコマンドに対しての何らかの応答(ACK)を返すモードであるのが前提</span>
+<span class="sd">        天秤の 内部設定</span>
+<span class="sd">            SF(シリアルインターフェース)</span>
+<span class="sd">            ErCd 1 (出力する AK,コード)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">port</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">baud_rate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># XLogger が存在しない時に仕方がないのでデフォルトの logging を使う</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+            <span class="n">log_level</span> <span class="o">=</span> <span class="n">log_level</span> <span class="ow">or</span> <span class="s2">&quot;INFO&quot;</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_port</span> <span class="o">=</span> <span class="n">port</span> <span class="ow">or</span> <span class="s2">&quot;COM3&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_baud_rate</span> <span class="o">=</span> <span class="n">baud_rate</span> <span class="ow">or</span> <span class="mi">19200</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mode</span> <span class="o">=</span> <span class="s2">&quot;Q&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Create AandD Device (Serial)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;timeout = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;baud_rate = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_baud_rate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;port = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="o">=</span> <span class="n">serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">(</span>
+                <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span>
+                <span class="n">baudrate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_baud_rate</span><span class="p">,</span>
+                <span class="n">parity</span><span class="o">=</span><span class="n">serial</span><span class="o">.</span><span class="n">PARITY_EVEN</span><span class="p">,</span>
+                <span class="n">bytesize</span><span class="o">=</span><span class="n">serial</span><span class="o">.</span><span class="n">SEVENBITS</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># ----------------------------------</span>
+        <span class="c1"># stream 測定スレッド制御</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream_stop_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="c1"># ----------------------------------</span>
+
+        <span class="c1"># ----------------------------------</span>
+        <span class="c1"># gRPC 利用を意識</span>
+        <span class="c1"># _stream で得た値が式意図を超えたときの結果によってevent発生</span>
+        <span class="c1"># Event / stream related</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+        <span class="c1"># ----------------------------------</span>
+        <span class="c1"># 外部通知先 (gRPC Event)</span>
+        <span class="c1">#</span>
+        <span class="c1"># 測定クライアント側で</span>
+        <span class="c1"># AanddReader生成</span>
+        <span class="c1">#   → EventBus生成</span>
+        <span class="c1">#   → reader._set_event_bus(event_bus)</span>
+        <span class="c1">#   → stream_start()</span>
+        <span class="c1">#   → event_arm()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_bus</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#</span>
+        <span class="c1"># eventを使わない場合</span>
+        <span class="c1"># (1) _event_sub は None</span>
+        <span class="c1"># (2) stream_start() は呼ばれない</span>
+        <span class="c1"># (3) event_arm() は呼ばれない</span>
+
+        <span class="c1"># ----------------------------------</span>
+        <span class="c1"># イベント条件・状態</span>
+        <span class="c1"># (gRPCに依存してないが実質的にはgRPC-Eventで用いる)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_topic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_threshold_g</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_once</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_armed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_above</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># ----------------------------------</span>
+
+        <span class="c1"># ----------------------------------</span>
+        <span class="c1"># トリガ判定用（streamイベント用）</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;raw&quot;</span>  <span class="c1"># raw / mean / median / ema</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_min_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_buffer</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_stable_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># ----------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+<div class="viewcode-block" id="AanddReader._close">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._close">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ストリーム停止とシリアルクローズを確実に行う</span>
+<span class="sd">        gRPC からもし使うときに gRPC側の close() とかぶるので名前を変えておく</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stream_stop</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+    <span class="c1"># ---------------------------</span>
+    <span class="c1"># Device Info API</span>
+    <span class="c1"># ---------------------------</span>
+
+<div class="viewcode-block" id="AanddReader.status">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.status">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.get_status">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.get_status">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.unit">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.unit">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.get_unit">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.get_unit">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.get_weight">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.get_weight">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.is_ack">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.is_ack">[ドキュメント]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_ack</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x06</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.get_serial_number">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.get_serial_number">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_serial_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ?SN</span>
+<span class="sd">        マニュアルには \r でも OK とあるが、\r\n が必須</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[Get Serial Number]&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">reset_input_buffer</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;?SN</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ID raw] </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># return line.decode(errors=&quot;ignore&quot;).strip()</span>
+            <span class="n">serial_number</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">13</span> <span class="ow">and</span> <span class="n">line</span> <span class="o">!=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">serial_number</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="n">serial_number</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.set_meas_mode">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.set_meas_mode">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_meas_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Q&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">val</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.get_meas_mode">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.get_meas_mode">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_meas_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mode</span></div>
+
+
+    <span class="c1"># ---------------------------------</span>
+    <span class="c1"># Device Ctrl API</span>
+    <span class="c1"># ---------------------------------</span>
+
+<div class="viewcode-block" id="AanddReader.reset">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.reset">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;reset</span>
+<span class="sd">        reset 後、測定するには 0.5 s くらい待たないとダメ</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.meas">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.meas">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meas</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Q</span>
+<span class="sd">        即時計測する</span>
+<span class="sd">        Returns:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># --- ストリームが動いているなら、必ず最新のストリーム値を返す ---</span>
+        <span class="n">thread_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span>
+        <span class="k">if</span> <span class="n">thread_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thread_obj</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+            <span class="c1"># 初回値がまだなら短時間だけ待つ</span>
+            <span class="n">wait_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.5</span>
+            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">wait_sec</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span>
+
+        <span class="c1"># --- 通常の Q/S 測定 ---</span>
+        <span class="n">mode_val</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="k">if</span> <span class="n">mode_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mode_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mode</span>
+
+        <span class="k">if</span> <span class="n">mode_val</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Q&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">mode_val</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+    <span class="c1"># ---------------------------------</span>
+    <span class="c1"># Device Ctrl Driver</span>
+    <span class="c1"># ---------------------------------</span>
+
+<div class="viewcode-block" id="AanddReader._r">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._r">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_r</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;reset</span>
+<span class="sd">        ACK前提</span>
+
+<span class="sd">        reset 後、測定するには 0.5 s くらい待たないとダメ</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[Serial] Reset(): _r&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Serial port is not opened.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">reset_input_buffer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;R</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;**Error**: No data received.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0x06</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="AanddReader._s">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._s">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_s</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ACKモード前提</span>
+
+<span class="sd">        Q, 安定後、データ取得</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Serial port is not opened.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">reset_input_buffer</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;S</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_measure_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">status</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">parsed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AanddReader._q">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._q">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_q</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ACKモード前提</span>
+
+<span class="sd">        Q, 即時</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Serial port is not opened.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">reset_input_buffer</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Q</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error(readline)**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="sa">b</span><span class="s2">&quot;EC,E02&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error(EC, E02)**: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;計測時間が短くて前回の命令動作を本体足している可能性があります&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_measure_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error(len(line)!=17)**: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;返信メッセージが正しくない可能性があります。たとえば「空」の可能性です&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;計測モードなどのパラメーターを疑ってください&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;line: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">status</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">parsed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AanddReader._stream">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._stream">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ストリームデータを1行読む</span>
+<span class="sd">        Q/S や SIR もしくは PRT の各モードも readline に値を書き出す</span>
+<span class="sd">        ので、どれがどれに対応しているのあわからなくなるので</span>
+
+<span class="sd">        Q/S で使うとき</span>
+<span class="sd">        SIR で readline を loop で撮り続ける</span>
+
+<span class="sd">        をきちんと区別して使い分けないとおかしいことになる。</span>
+<span class="sd">        また、PRT の各モードは上記のコマンドベースにキックされて　readline に</span>
+<span class="sd">        流れる以外にPRTの各機能でそれぞれの周期やボタンで readline にデーターを</span>
+<span class="sd">        流すので Q/S/SIR を使う時は PRT を 0 にしておかないと訳がわからなくなる。</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Serial port is not opened.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># SIR だとタイムアウトで空行は起こり得るので無視</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+            <span class="c1"># self._logger.error(&quot;No data received.&quot;)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># SIRの失敗は EC,Exx が返る</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;EC,&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error(EC)**: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># erCd=1 の場合、各コマンドに ACK(0x06) が返るため無視</span>
+        <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x06</span><span class="s2">&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_measure_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">status</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">parsed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AanddReader._parse_measure_line">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._parse_measure_line">[ドキュメント]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_measure_line</span><span class="p">(</span>
+        <span class="n">line</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="c1"># 例: b&#39;ST,+0000.000  g\r\n&#39; を想定</span>
+        <span class="c1"># 固定長の厳密チェックはしないが、最低限の slicing が成立する長さは必要</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">unit</span></div>
+
+
+    <span class="c1"># ----------------------------</span>
+    <span class="c1"># for Event (gRPC and thread)</span>
+    <span class="c1"># ----------------------------</span>
+
+<div class="viewcode-block" id="AanddReader._set_event_bus">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._set_event_bus">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_event_bus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_bus</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        gRPC の event による制御が回るように gRPC のイベントを挿入</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_bus</span> <span class="o">=</span> <span class="n">event_bus</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.event_set_config">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.event_set_config">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">event_set_config</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">threshold_g</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">above</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Event 条件の設定だけを行う。</span>
+<span class="sd">        設定後、event_arm() で armed を有効化する。</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_topic</span> <span class="o">=</span> <span class="n">topic</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_threshold_g</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold_g</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_above</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">above</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.event_arm">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.event_arm">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">event_arm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">once</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Event の armed フラグを立てる。</span>
+<span class="sd">        topic/threshold は event_set_config() で先に設定する。</span>
+
+<span class="sd">        armed を立てていると gRPC のイベントモードになるのでチェックする</span>
+<span class="sd">        そのときに onece を入れていると、一回だけ閾値超え判定がある。</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            once (bool):  イベントは一回のみ</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_topic</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_threshold_g</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_once</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">once</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_armed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.event_disarm">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.event_disarm">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">event_disarm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_armed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.set_trigger_mode">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.set_trigger_mode">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_trigger_mode</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+        <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">min_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">stable_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        streamイベントのトリガ値算出方法を設定する。</span>
+
+<span class="sd">        mode=raw, stable_only=True で値が stable のものだけ閾値チェック</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mode: raw / mean / median / ema</span>
+<span class="sd">            window: 平均・中央値で使う窓サイズ</span>
+<span class="sd">            min_samples: 判定に必要な最小サンプル数（Noneならwindow）</span>
+<span class="sd">            alpha: EMA係数（0-1）</span>
+<span class="sd">            stable_only: TrueならST以外は無視</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_mode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_window</span> <span class="o">=</span> <span class="n">w</span>
+            <span class="k">if</span> <span class="n">min_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_min_samples</span> <span class="o">=</span> <span class="n">w</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_min_samples</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_samples</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_stable_only</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">stable_only</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AanddReader._calc_trigger_value">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._calc_trigger_value">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_trigger_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_val</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        トリガ判定に使う値を計算する。</span>
+<span class="sd">        None を返した場合は判定をスキップする。</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 安定値だけ使う場合</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_stable_only</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">!=</span> <span class="s2">&quot;ST&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_buffer</span>
+        <span class="n">buf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight_val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_window</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_min_samples</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_mode</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;raw&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">weight_val</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;median&quot;</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">b</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;ema&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span> <span class="o">=</span> <span class="n">weight_val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_alpha</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">weight_val</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_ema</span>
+
+        <span class="c1"># 不明なモードは raw と同じ扱い</span>
+        <span class="k">return</span> <span class="n">weight_val</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.stream_start">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.stream_start">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stream_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="n">thread_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span>
+            <span class="k">if</span> <span class="n">thread_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">thread_obj</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream_stop_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+                <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream_loop</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AanddReaderStream&quot;</span><span class="p">,</span>
+                <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="AanddReader.stream_stop">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader.stream_stop">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stream_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="c1"># stream_loop での thread停止をするために thread-event set する</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream_stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="n">thread_obj</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="n">thread_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span>
+
+        <span class="c1"># 念の為 SIRの停止コマンド</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;C</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># loop で readline 取得を止める</span>
+        <span class="k">if</span> <span class="n">thread_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">thread_obj</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream_thread</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="AanddReader._stream_loop">
+<a class="viewcode-back" href="../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader._stream_loop">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stream_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        1. stream_start() でスレッド起動</span>
+<span class="sd">        2. _stream_loop の先頭で SIR を送る</span>
+<span class="sd">        3. readline() で連続取得</span>
+<span class="sd">        4. stream_stop() で停止フラグ</span>
+<span class="sd">        5. _stream_loop 側で C を送って終了</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># --- SIR 開始 ---</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Serial port is not opened.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">reset_input_buffer</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;SIR</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># 連続データ要求</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Error(SIR start)**: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># SIR開始直後の1行目はゴミになることがあるので捨てる</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream_stop_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;C</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># SIR 停止</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">return</span>
+
+            <span class="n">stream_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stream_val</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">weight_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stream_val</span><span class="p">)</span>
+
+            <span class="n">event_bus</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">topic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">threshold_g</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">armed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">once</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1">###################################################</span>
+            <span class="c1"># トリガーとして raw 値ではなくて計算する</span>
+            <span class="n">trigger_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_trigger_value</span><span class="p">(</span><span class="n">weight_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">trigger_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">weight_val</span> <span class="o">=</span> <span class="n">trigger_val</span>
+            <span class="c1">###################################################</span>
+
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="n">above</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_above</span><span class="p">)</span>
+                <span class="n">event_bus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_bus</span>
+                <span class="n">topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_topic</span>
+                <span class="n">threshold_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_threshold_g</span>
+                <span class="n">armed</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_armed</span><span class="p">)</span>
+                <span class="n">once</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_once</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">event_bus</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">topic</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">threshold_g</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1">###################################################</span>
+            <span class="c1"># 閾値チェックを入れるか入れないか？</span>
+            <span class="c1"># gRPC-event 入れるか？入れないか？</span>
+            <span class="k">if</span> <span class="n">armed</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># 閾値より上と下を選べる</span>
+            <span class="c1"># if weight_val &gt;= float(threshold_g):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">above</span> <span class="ow">and</span> <span class="n">weight_val</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold_g</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="p">(</span><span class="ow">not</span> <span class="n">above</span><span class="p">)</span> <span class="ow">and</span> <span class="n">weight_val</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold_g</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="c1">###################################################</span>
+                <span class="n">payload</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;weight_g&quot;</span><span class="p">:</span> <span class="n">weight_val</span><span class="p">,</span>
+                    <span class="s2">&quot;threshold_g&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold_g</span><span class="p">),</span>
+                <span class="p">}</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="c1"># 閾値判定は一回だけ発火(発火後のみどす)</span>
+                <span class="k">if</span> <span class="n">once</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_event_armed</span> <span class="o">=</span> <span class="kc">False</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+    <span class="c1"># log_level_ = &quot;info&quot;</span>
+    <span class="n">log_level_</span> <span class="o">=</span> <span class="s2">&quot;debug&quot;</span>
+    <span class="n">logger_</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level_</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;AandDReader&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">aandd_reader</span> <span class="o">=</span> <span class="n">AanddReader</span><span class="p">(</span>
+        <span class="n">port</span><span class="o">=</span><span class="s2">&quot;COM3&quot;</span><span class="p">,</span>
+        <span class="c1"># port=&quot;COM4&quot;,</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger_</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level_</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># aandd_reader.cal()</span>
+    <span class="n">logger_</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SN: </span><span class="si">{</span><span class="n">aandd_reader</span><span class="o">.</span><span class="n">get_serial_number</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">logger_</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aandd_reader</span><span class="o">.</span><span class="n">meas</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># print(aandd_reader.status())</span>
+    <span class="c1"># print(aandd_reader.unit())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
