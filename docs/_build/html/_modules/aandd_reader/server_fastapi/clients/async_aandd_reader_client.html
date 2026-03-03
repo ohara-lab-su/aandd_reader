@@ -1,0 +1,232 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aandd_reader.server_fastapi.clients.async_aandd_reader_client &mdash; Project  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Project
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">aandd_reader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/aandd_reader.html">aandd_reader package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/aandd_reader.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/aandd_reader.server_fastapi.html">aandd_reader.server_fastapi package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/aandd_reader.server_grpc.html">aandd_reader.server_grpc package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/aandd_reader.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/aandd_reader.html#module-aandd_reader.aandd_reader">aandd_reader.aandd_reader module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/aandd_reader.html#aandd_reader.aandd_reader.AanddReader"><code class="docutils literal notranslate"><span class="pre">AanddReader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/aandd_reader.html#module-aandd_reader.config">aandd_reader.config module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/aandd_reader.html#aandd_reader.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/intro.html">チュートリアル</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Project</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">aandd_reader.server_fastapi.clients.async_aandd_reader_client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>aandd_reader.server_fastapi.clients.async_aandd_reader_client のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Kengo NAKADA:</span>
+<span class="sd">https://github.com/shimane-dev, https://github.com/kengo-nakada</span>
+<span class="sd">kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nest_asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_fastapi.spec_ctrl</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">aandd_reader_api_spec</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_fastapi.models.comman</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ResultResponse</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ese774_frame.clients.async_device_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDeviceClient</span>
+
+
+<div class="viewcode-block" id="AsyncAanddReaderClient">
+<a class="viewcode-back" href="../../../../api/aandd_reader.server_fastapi.clients.html#aandd_reader.server_fastapi.clients.async_aandd_reader_client.AsyncAanddReaderClient">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncAanddReaderClient</span><span class="p">(</span><span class="n">AsyncDeviceClient</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Config</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        旧版との互換インターフェース（引数）を保ったまま</span>
+<span class="sd">        AsyncDeviceClient に api_spec, base_url を自動設定して渡すラッパ</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">server_ip</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">SERVER_IP</span>
+            <span class="n">server_port</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">FASTAPI_PORT</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+        <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="n">server_ip</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">server_port</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span> <span class="o">=</span> <span class="n">base_url</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CLIENT] server_ip = </span><span class="si">{</span><span class="n">server_ip</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CLIENT] server_port = </span><span class="si">{</span><span class="n">server_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CLIENT] base_url = </span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">server_ip</span><span class="o">=</span><span class="n">server_ip</span><span class="p">,</span>
+            <span class="n">server_port</span><span class="o">=</span><span class="n">server_port</span><span class="p">,</span>
+            <span class="n">api_spec</span><span class="o">=</span><span class="n">aandd_reader_api_spec</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+            <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># property style で一部メソッドを使えるようにする</span>
+    <span class="c1">#</span>
+
+<div class="viewcode-block" id="AsyncAanddReaderClient._sync_await">
+<a class="viewcode-back" href="../../../../api/aandd_reader.server_fastapi.clients.html#aandd_reader.server_fastapi.clients.async_aandd_reader_client.AsyncAanddReaderClient._sync_await">[ドキュメント]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sync_await</span><span class="p">(</span><span class="n">coro</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">loop</span> <span class="ow">and</span> <span class="n">loop</span><span class="o">.</span><span class="n">is_running</span><span class="p">():</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">nest_asyncio</span>
+
+            <span class="n">nest_asyncio</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">coro</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">coro</span><span class="p">)</span></div>
+</div>
+
+
+    <span class="c1"># def __getattr__(self, name):</span>
+    <span class="c1">#     m = re.match(r&quot;^(P|F|I|IO)(\d+)$&quot;, name)</span>
+    <span class="c1">#     if m:</span>
+    <span class="c1">#         kind, id_num = m.group(1), int(m.group(2))</span>
+    <span class="c1">#         # 1. 一番堅実：「P&quot;, 110 で渡す</span>
+    <span class="c1">#         print(&quot;==getattr==&quot;, kind, id_num)</span>
+    <span class="c1">#         return self._sync_await(self.get_var(kind, id_num))</span>
+    <span class="c1">#         # 2. もしget_var(&quot;P110&quot;)しかAPI specで対応してなければ↓</span>
+    <span class="c1">#         # return self._sync_await(self.get_var(f&quot;{kind}{id_num}&quot;))</span>
+    <span class="c1">#     raise AttributeError(</span>
+    <span class="c1">#         f&quot;&#39;{type(self).__name__}&#39; object has no attribute &#39;{name}&#39;&quot;</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1"># def __setattr__(self, name, value):</span>
+    <span class="c1">#     if isinstance(name, str):</span>
+    <span class="c1">#         m = re.match(r&quot;^(P|F|I|IO)(\d+)$&quot;, name)</span>
+    <span class="c1">#         if m:</span>
+    <span class="c1">#             kind, id_num = m.group(1), int(m.group(2))</span>
+    <span class="c1">#             self._sync_await(self.set_var(kind, id_num, value))</span>
+    <span class="c1">#             return</span>
+    <span class="c1">#     super().__setattr__(name, value)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
