@@ -1,5 +1,5 @@
 
-AandD 電子天秤 Reader (AandD reader)
+# AandD 電子天秤 Reader (AandD reader)
 ---
 
 ```{toctree}
@@ -9,6 +9,11 @@ AandD 電子天秤 Reader (AandD reader)
 api/modules
 tutorials/intro
 ```
+
+AandD の電子天秤用の制御
+
+- ese774_frame 対応
+- grpc_frame 対応
 
 # 作者
 - Kengo NAKADA (中田謙吾)
