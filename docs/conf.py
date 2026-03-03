@@ -28,25 +28,21 @@ source_suffix = {
     ".md": "markdown",
 }
 
-
 # MyST のオプション(markdown ページ作成に必要な最小構成)
 myst_enable_extensions = [
-    "colon_fence",  # colon_fence: ::: を使った柔軟なフェンスブロック構文を有効化
-    "deflist",  # deflist: 定義リスト（用語と説明のペア）構文をサポート
-    "attrs_block",  # attrs_block: ブロック要素にクラスやIDなどの属性を付与できる
-    "substitution",  # substitution: {sub} のような変数置換構文を有効化
-    "linkify",  # linkify: テキスト中のURLやメールアドレスを自動的にリンク化
-    "heading_anchors",
+    "colon_fence",  # ::: フェンス
+    "deflist",  # 定義リスト
+    "attrs_block",  # 属性付与
+    "substitution",  # 置換
+    "linkify",  # URL 自動リンク
 ]
 myst_linkify_fuzzy_links = True
 myst_heading_anchors = 3
-markdown_title = "primary"  # Markdown を確実に「ページ」として扱わせる最重要設定
 
 # autosummary で目録ページを自動生成
 autosummary_generate = True
 
 # 型ヒント参照で失敗した時の警告を抑制する
-# nitpick 無視
 nitpick_ignore = [
     ("py:class", "ese774_frame.clients.async_device_client.AsyncDeviceClient"),
     ("py:class", "ese774_frame.clients.sync_device_client.SyncDeviceClient"),
@@ -58,10 +54,8 @@ nitpick_ignore = [
     ("py:class", "pydantic.main.BaseModel"),
     ("py:class", "ConfigDict"),
     ("py:class", "enum.Enum"),
-    # 必要な型は全てここに追記
 ]
 
-# 追加で推奨: 型エイリアス
 autodoc_type_aliases = {
     "XLogger": "x_logger.x_logger.XLogger",
     "Path": "pathlib.Path",
@@ -70,25 +64,19 @@ autodoc_type_aliases = {
     "Enum": "enum.Enum",
 }
 
-# autodoc の既定オプション：これが無いと“中身が出ない”ことがある
 autodoc_default_options = {
     "members": True,
-    "undoc-members": True,  # docstring が無いメンバも列挙
+    "undoc-members": True,
     "show-inheritance": True,
-    # 必要に応じて:
-    # "inherited-members": True,
     "private-members": True,
 }
 
-# 表示設定: 読みやすさ
 add_module_names = False
 autodoc_typehints = "description"
 autodoc_preserve_defaults = True
 set_type_checking_flag = True
 
-# CIで重い依存が import できないならここでモック（必要に応じて追記）
 autodoc_mock_imports = [
-    # "torch", "opencv", "tensorflow", ...
     "win32com",
     "pythoncom",
     "x_logger",
@@ -98,17 +86,12 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "pydantic": ("https://docs.pydantic.dev/latest/", None),
     "fastapi": ("https://fastapi.tiangolo.com/", None),
-    # x_logger のようなローカル/私家版はインベントリが無いので参照解決不可
 }
 
-# テーマ
-html_theme = "sphinx_rtd_theme"  # pip install sphinx-rtd-theme
-# html_theme = "furo"
+html_theme = "sphinx_rtd_theme"
 html_theme_options = {
-    # "sidebar_hide_name": True,
-    # "navigation_with_keys": True,
-    "collapse_navigation": False,  # 折りたたまれず常に展開
-    "navigation_depth": 4,  # 階層の深さ（toctree の maxdepth に対応）
-    "titles_only": False,  # 各ページの見出しもサイドバーに表示
+    "collapse_navigation": False,
+    "navigation_depth": 4,
+    "titles_only": False,
 }
 html_static_path = ["_static"]
