@@ -148,8 +148,54 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="aandd-reader-server-fastapi-make-module">
-<h2>aandd_reader.server_fastapi.make module<a class="headerlink" href="#aandd-reader-server-fastapi-make-module" title="Link to this heading"></a></h2>
+<section id="module-aandd_reader.server_fastapi.make">
+<span id="aandd-reader-server-fastapi-make-module"></span><h2>aandd_reader.server_fastapi.make module<a class="headerlink" href="#module-aandd_reader.server_fastapi.make" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>API spec（FastAPI 側の定義）から機械的に pyi を生成</p></li>
+<li><p>その pyi を後処理で「現実の Python クラス構造」に合わせて修正</p></li>
+<li><p>router 側の pyi は従来どおり素直に生成</p></li>
+</ol>
+<p>味噌は
+pyi は「.py を上書きする仕様」であり、
+pyi に書いていない事実（継承・自前メソッド）は「存在しない」扱いになる</p>
+<p>つまり、継承したクラス(親クラスのpyi)が存在するが。
+その継承したclassをオーバーライトしている pyi はそのままでは機能しない</p>
+<p>生成後の pyi を現実のクラス構造に合わせて補正する必要がある
+つまり API spec に載っていない時前メソッドを pyi についか</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="aandd_reader.server_fastapi.make._patch_pyi_inheritance_and_extras">
+<span class="sig-name descname"><span class="pre">_patch_pyi_inheritance_and_extras</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_import_line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_method_lines</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/server_fastapi/make.html#_patch_pyi_inheritance_and_extras"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.server_fastapi.make._patch_pyi_inheritance_and_extras" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>base_import_line</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>base_class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>extra_method_lines</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aandd_reader.server_fastapi.make.chdir">
+<span class="sig-name descname"><span class="pre">chdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/server_fastapi/make.html#chdir"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.server_fastapi.make.chdir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aandd_reader.server_fastapi.make.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aandd_reader/server_fastapi/make.html#main"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#aandd_reader.server_fastapi.make.main" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-aandd_reader.server_fastapi.spec_ctrl">
 <span id="aandd-reader-server-fastapi-spec-ctrl-module"></span><h2>aandd_reader.server_fastapi.spec_ctrl module<a class="headerlink" href="#module-aandd_reader.server_fastapi.spec_ctrl" title="Link to this heading"></a></h2>
