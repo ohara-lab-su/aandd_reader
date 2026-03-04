@@ -76,10 +76,14 @@ autodoc_typehints = "description"
 autodoc_preserve_defaults = True
 set_type_checking_flag = True
 
+# パッケージ内でインポートしているモジュール関係を Sphinxで追いかけない
 autodoc_mock_imports = [
     "win32com",
     "pythoncom",
     "x_logger",
+    "ese774_frame",
+    "grpc_frame",
+    "grpc",
 ]
 
 intersphinx_mapping = {

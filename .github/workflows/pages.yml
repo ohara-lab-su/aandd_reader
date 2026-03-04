@@ -33,10 +33,13 @@ jobs:
           python3 -m pip install -r requirements.txt
           python3 -m pip install sphinx myst-parser sphinx-rtd-theme linkify-it-py
 
+      # - name: Build Sphinx
+      #   working-directory: docs
+      #   run: |
+      #     sphinx-build -b html . _build/html
       - name: Build Sphinx
-        working-directory: docs
         run: |
-          sphinx-build -b html . _build/html
+          bash docs/build.sh
 
       - name: Upload
         uses: actions/upload-pages-artifact@v3
