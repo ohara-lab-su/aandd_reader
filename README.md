@@ -1,5 +1,7 @@
 # AAndD_Reader
 
+[ohara-lab-su](https://ohara-lab-su.github.io/)/[aandd_reader](https://ohara-lab-su.github.io/aandd_reader/)
+
 ## info
 
 - FX-200i 天秤
