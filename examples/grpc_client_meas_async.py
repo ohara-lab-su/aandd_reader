@@ -4,15 +4,11 @@ Kengo NAKADA:
 https://github.com/shimane-dev, https://github.com/kengo-nakada
 kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 """
-# meas_grpc.py
 from __future__ import annotations
 import asyncio
-
 import time
 import logging
 from pathlib import Path
-
-# meas_grpc.py
 
 from aandd_reader import Config
 
