@@ -9,6 +9,9 @@
 api/modules
 tutorials/intro
 ```
+view on [github](https://github.com/ohara-lab-su/aandd_reader/)
+
+---
 
 AandD の電子天秤用の制御
 
