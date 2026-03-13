@@ -64,7 +64,15 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">チュートリアル</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">チュートリアル</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-ese774">A. サーバーの起動 (ese774互換)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#b-event">B. サーバーの起動 (Event駆動での利用の場合)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ese774">基本的なクライアントの使い方(ese774)共通)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grpc-sync">基本的なクライアントの使い方(gRPC) sync版</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grpc-async">基本的なクライアントの使い方(gRPC) async版</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">イベント起動</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -94,6 +102,315 @@
   <section id="id1">
 <h1>チュートリアル<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
 <p>このセクションでは AandD の電子天秤制御 aandd_reader の使い方を段階的に説明します。</p>
+<p>A or B のどちらかでお使いください</p>
+<section id="a-ese774">
+<h2>A. サーバーの起動 (ese774互換)<a class="headerlink" href="#a-ese774" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>A(ese774) or B(gRPC) のどちらかでお使いください</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">AanddReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_fastapi.routers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AanddReaderRouter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_fastapi.spec_ctrl</span><span class="w"> </span><span class="kn">import</span> <span class="n">aandd_reader_api_spec</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ese774_frame.api_server</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastApiServer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger.x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">HERE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+
+    <span class="n">Config</span><span class="o">.</span><span class="n">load_yaml</span><span class="p">(</span><span class="n">HERE</span> <span class="o">/</span> <span class="s2">&quot;config_server1.yaml&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="n">Config</span><span class="o">.</span><span class="n">SERVER_LOGGER_NAME</span><span class="p">,</span>
+        <span class="n">log_mode</span><span class="o">=</span><span class="s2">&quot;rotate&quot;</span><span class="p">,</span>
+        <span class="c1"># log_mode=&quot;file&quot;,</span>
+        <span class="n">log_name</span><span class="o">=</span><span class="s2">&quot;c:/opt/log/aandd.log&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;log_mode = </span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">log_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;log_name = </span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">log_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PORT = </span><span class="si">{</span><span class="n">Config</span><span class="o">.</span><span class="n">DEVICE_PORT</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">server</span> <span class="o">=</span> <span class="n">FastApiServer</span><span class="p">(</span>
+        <span class="n">device_cls</span><span class="o">=</span><span class="n">AanddReader</span><span class="p">,</span>  <span class="c1"># 制御クラス</span>
+        <span class="n">router_cls</span><span class="o">=</span><span class="n">AanddReaderRouter</span><span class="p">,</span>  <span class="c1"># routerクラス</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">,</span>
+        <span class="n">api_spec</span><span class="o">=</span><span class="n">aandd_reader_api_spec</span><span class="p">,</span>
+        <span class="n">device_kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="o">.</span><span class="n">DEVICE_PORT</span>
+        <span class="p">},</span>  <span class="c1"># COBOTTA制御Classのコンストラクタ引数)</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="n">Config</span><span class="o">.</span><span class="n">SERVER_LOGGER_NAME</span><span class="p">,</span>  <span class="c1"># LOGGER_NAME</span>
+        <span class="n">lifespan_msg_prefix</span><span class="o">=</span><span class="s2">&quot;AANDD&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">server</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">Config</span><span class="o">.</span><span class="n">SERVER_IP</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">Config</span><span class="o">.</span><span class="n">FASTAPI_PORT</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="b-event">
+<h2>B. サーバーの起動 (Event駆動での利用の場合)<a class="headerlink" href="#b-event" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent</span><span class="w"> </span><span class="kn">import</span> <span class="n">futures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">grpc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">grpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">channel_ready_future</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_grpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">aandd_reader_server</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger.x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">load_yaml</span><span class="p">(</span><span class="s2">&quot;config_server1.yaml&quot;</span><span class="p">)</span>
+
+    <span class="c1"># DEVICE_PORT = Config.DEVICE_PORT</span>
+    <span class="n">GRPC_HOST</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">SERVER_IP</span>
+    <span class="n">GRPC_PORT</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">GRPC_PORT</span>
+    <span class="n">DEVICE_PORT</span> <span class="o">=</span> <span class="s2">&quot;COM4&quot;</span>
+    <span class="c1"># GRPC_HOST = &quot;10.170.10.38&quot;</span>
+    <span class="c1"># GRPC_PORT = 50051</span>
+    <span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span>
+
+    <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">LOG_LEVEL</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;JoypadServer&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">aandd_reader_server</span><span class="p">(</span>
+        <span class="n">device_port</span><span class="o">=</span><span class="n">DEVICE_PORT</span><span class="p">,</span>
+        <span class="n">grpc_host</span><span class="o">=</span><span class="n">GRPC_HOST</span><span class="p">,</span>
+        <span class="n">grpc_port</span><span class="o">=</span><span class="n">GRPC_PORT</span><span class="p">,</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">LOGGER</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">LOG_LEVEL</span><span class="p">,</span>
+    <span class="p">)</span>
+
+</pre></div>
+</div>
+</section>
+<section id="ese774">
+<h2>基本的なクライアントの使い方(ese774)共通)<a class="headerlink" href="#ese774" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="c1">#!/usr/bin/env python</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">AanddReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">log_mode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;info&quot;</span><span class="p">,</span>
+        <span class="n">log_mode</span><span class="o">=</span><span class="n">log_mode</span><span class="p">,</span>
+        <span class="n">log_name</span><span class="o">=</span><span class="s2">&quot;aandd.log&quot;</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;aandd_reader&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># COMポートを選ぶ</span>
+    <span class="c1"># aandd_reader = AanddReader(port=&quot;COM4&quot;, logger=logger)</span>
+    <span class="n">aandd_reader</span> <span class="o">=</span> <span class="n">AanddReader</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="s2">&quot;COM3&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+
+    <span class="c1"># Reset</span>
+    <span class="n">aandd_reader</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="c1"># 測定</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">aandd_reader</span><span class="o">.</span><span class="n">meas</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error measuring.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</section>
+<section id="grpc-sync">
+<h2>基本的なクライアントの使い方(gRPC) sync版<a class="headerlink" href="#grpc-sync" title="Link to this heading"></a></h2>
+<p>実質的には使い方が同じ(呼び出すクラス名が一つだけ異なる)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># meas_grpc.py</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_grpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AanddReaderGrpcClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+<span class="c1"># logging.basicConfig(level=&quot;INFO&quot;)</span>
+<span class="c1"># logger = logging.getLogger(&quot;aandd_meas_grpc&quot;)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">HERE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">load_yaml</span><span class="p">(</span><span class="n">HERE</span> <span class="o">/</span> <span class="s2">&quot;config_server1.yaml&quot;</span><span class="p">)</span>
+
+    <span class="n">log_level</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="n">Config</span><span class="o">.</span><span class="n">CLIENT_LOGGER_NAME</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">AanddReaderGrpcClient</span><span class="p">(</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">,</span>
+        <span class="c1"># server_ip=&quot;10.170.10.38&quot;,</span>
+        <span class="c1"># server_port=50051,  # gRPC</span>
+        <span class="c1"># timeout_sec=0.5,  # 入力しなければ、None がデフォでNonだと 0.5 になる</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># client.reset()</span>
+    <span class="c1"># time.sleep(0.5)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">meas</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+    <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="grpc-async">
+<h2>基本的なクライアントの使い方(gRPC) async版<a class="headerlink" href="#grpc-async" title="Link to this heading"></a></h2>
+<p>ese774版と使い方が同じ(呼び出すクラス名が一つだけ異なる)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># meas_grpc.py</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+
+<span class="c1"># from aandd_reader.server_grpc import AanddReaderGrpcClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_grpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncAanddReaderGrpcClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+<span class="c1"># logging.basicConfig(level=&quot;INFO&quot;)</span>
+<span class="c1"># logger = logging.getLogger(&quot;aandd_meas_grpc&quot;)</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">HERE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">load_yaml</span><span class="p">(</span><span class="n">HERE</span> <span class="o">/</span> <span class="s2">&quot;config_server1.yaml&quot;</span><span class="p">)</span>
+
+    <span class="n">log_level</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="n">Config</span><span class="o">.</span><span class="n">CLIENT_LOGGER_NAME</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">AsyncAanddReaderGrpcClient</span><span class="p">(</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">,</span>
+        <span class="c1"># server_ip=&quot;10.170.10.38&quot;,</span>
+        <span class="c1"># server_port=50051,  # gRPC</span>
+        <span class="c1"># timeout_sec=0.5,  # 入力しなければ、None がデフォでNonだと 0.5 になる</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># client.reset()</span>
+    <span class="c1"># time.sleep(0.5)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">meas</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+    <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>イベント起動<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader.server_grpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AanddReaderGrpcClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">on_weight_event</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== EVENT RECEIVED ===&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=======================&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">load_yaml</span><span class="p">(</span><span class="s2">&quot;config_server1.yaml&quot;</span><span class="p">)</span>
+
+    <span class="n">log_level</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;aandd_reader&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">AanddReaderGrpcClient</span><span class="p">(</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">,</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- Event 測定の準備（順番はクライアント内部に閉じ込める） ---</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">prepare_event_measurement</span><span class="p">(</span>
+        <span class="n">topic</span><span class="o">=</span><span class="s2">&quot;weight_threshold&quot;</span><span class="p">,</span>
+        <span class="n">threshold_g</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># 閾値g</span>
+        <span class="n">above</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">once</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="c1"># trigger_mode=&quot;mean&quot;,</span>
+        <span class="n">trigger_mode</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+        <span class="c1"># trigger_window=3,</span>
+        <span class="c1"># trigger_min_samples=3,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- 1イベント待つ ---</span>
+    <span class="n">event</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_event</span><span class="p">()</span>
+    <span class="n">on_weight_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="c1"># --- 後始末 ---</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">stream_stop</span><span class="p">()</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+</div>
+</section>
 </section>
 
 
