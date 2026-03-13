@@ -1,4 +1,5 @@
 # AandD 電子天秤 Reader (AandD reader)
+K.NAKADA (Shimane University)  
 view on [github](https://github.com/ohara-lab-su/aandd_reader/) / [ohara-lab-su (doc)](https://ohara-lab-su.github.io/)
 
 
