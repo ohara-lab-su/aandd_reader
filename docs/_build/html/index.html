@@ -64,7 +64,15 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/intro.html">チュートリアル</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/intro.html">チュートリアル</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#a-ese774">A. サーバーの起動 (ese774互換)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#b-event">B. サーバーの起動 (Event駆動での利用の場合)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#ese774">基本的なクライアントの使い方(ese774)共通)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#grpc-sync">基本的なクライアントの使い方(gRPC) sync版</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#grpc-async">基本的なクライアントの使い方(gRPC) async版</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#id2">イベント起動</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -93,6 +101,8 @@
              
   <section id="aandd-reader-aandd-reader">
 <h1>AandD 電子天秤 Reader (AandD reader)<a class="headerlink" href="#aandd-reader-aandd-reader" title="Link to this heading"></a></h1>
+<p>K.NAKADA (Shimane University)<br />
+view on <a class="reference external" href="https://github.com/ohara-lab-su/aandd_reader/">github</a> / <a class="reference external" href="https://ohara-lab-su.github.io/">ohara-lab-su (doc)</a></p>
 <hr class="docutils" />
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
@@ -101,17 +111,64 @@
 <li class="toctree-l2"><a class="reference internal" href="api/aandd_reader.html">aandd_reader package</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/intro.html">チュートリアル</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/intro.html">チュートリアル</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#a-ese774">A. サーバーの起動 (ese774互換)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#b-event">B. サーバーの起動 (Event駆動での利用の場合)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#ese774">基本的なクライアントの使い方(ese774)共通)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#grpc-sync">基本的なクライアントの使い方(gRPC) sync版</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#grpc-async">基本的なクライアントの使い方(gRPC) async版</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/intro.html#id2">イベント起動</a></li>
+</ul>
+</li>
 </ul>
 </div>
-<p>AandD の電子天秤用の制御</p>
+<hr class="docutils" />
 <ul class="simple">
 <li><p>ese774_frame 対応</p></li>
 <li><p>grpc_frame 対応</p></li>
 </ul>
-</section>
 <section id="id1">
-<h1>作者<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<h2>基本的な計測例<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aandd_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">AanddReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">x_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">XLogger</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">log_mode</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">XLogger</span><span class="p">(</span>
+        <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;info&quot;</span><span class="p">,</span>
+        <span class="n">log_mode</span><span class="o">=</span><span class="n">log_mode</span><span class="p">,</span>
+        <span class="n">log_name</span><span class="o">=</span><span class="s2">&quot;aandd.log&quot;</span><span class="p">,</span>
+        <span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;aandd_reader&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># COMポートを選ぶ</span>
+    <span class="c1"># aandd_reader = AanddReader(port=&quot;COM4&quot;, logger=logger)</span>
+    <span class="n">aandd_reader</span> <span class="o">=</span> <span class="n">AanddReader</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="s2">&quot;COM3&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+
+    <span class="c1"># Reset</span>
+    <span class="n">aandd_reader</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="c1"># 測定</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">aandd_reader</span><span class="o">.</span><span class="n">meas</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error measuring.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id2">
+<h1>作者<a class="headerlink" href="#id2" title="Link to this heading"></a></h1>
 <ul class="simple">
 <li><p>Kengo NAKADA (中田謙吾)</p>
 <ul>
