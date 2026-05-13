@@ -14,7 +14,8 @@ from pathlib import Path
 
 from ese774_frame import DeviceProxy
 from aandd_reader import Config
-import aandd_reader.server
+
+# import aandd_reader.server
 
 # from aandd_reader import AsyncAanddReaderClient
 from x_logger import XLogger
@@ -33,11 +34,11 @@ async def main():
     Config.load_yaml("config_aandd2_server4.yaml")
 
     log_level = "info"
-
     logger = XLogger(
-        log_level="info",
+        log_level=log_level,
         logger_name=Config.CLIENT_LOGGER_NAME,
     )
+
     # client = AsyncAanddReaderClient(
     #     config=Config,
     #     logger=logger,
