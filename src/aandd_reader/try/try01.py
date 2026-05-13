@@ -14,7 +14,8 @@ import serial
 
 ser = serial.Serial(
     port="COM3",
-    baudrate=2400,
+    # baudrate=2400,
+    baudrate=19200,
     parity=serial.PARITY_EVEN,
     bytesize=serial.SEVENBITS,
     timeout=0.5,

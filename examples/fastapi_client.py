@@ -4,6 +4,7 @@ Kengo NAKADA:
 https://github.com/shimane-dev, https://github.com/kengo-nakada
 kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 """
+
 # import pytest
 import asyncio
 
@@ -22,8 +23,11 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 # @pytest.mark.asyncio
 # async def test_fastapi_async_meas():
 async def main():
-    HERE = Path(__file__).parent
-    Config.load_yaml(HERE / "config_server1.yaml")
+    # HERE = Path(__file__).parent
+    # Config.load_yaml(HERE / "config_aandd1_server1.yaml")
+
+    # Config.load_yaml("config_aandd1_server1.yaml")
+    Config.load_yaml("config_aandd2_server4.yaml")
 
     log_level = "info"
 
