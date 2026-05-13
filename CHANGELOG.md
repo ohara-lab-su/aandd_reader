@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026.05.13 v0.2.11, nakada
+
+**ese774_frame v0.4.20** 以降がマスト
+
+```__ini__.py``` において、```DeviceProxy``` への register を追加
+
 ## 2026.03.15 v0.2.10, nakada
 
 - ドキュメント整備
