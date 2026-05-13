@@ -14,8 +14,7 @@ from pathlib import Path
 
 from ese774_frame import DeviceProxy
 from aandd_reader import Config
-
-# import aandd_reader.server
+import aandd_reader.server
 
 # from aandd_reader import AsyncAanddReaderClient
 from x_logger import XLogger
