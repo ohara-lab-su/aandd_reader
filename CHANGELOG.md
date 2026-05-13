@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 2026.05.13 v0.2.12, nakada (test DeviceProxy)
+
+**ese774_frame v0.4.20** 以降がマスト
+
+- DeviceProxy のテスト
+- __init__ 関係の修正
+- DeviceProxy サンプル追加
+
+## 2026.05.13 v0.2.11, nakada
+
+**ese774_frame v0.4.20** 以降がマスト
+
+config のパス設定を新しい方式(cobotta2 v0.13.8)
+に合わせる
+
 ## 2026.05.13 v0.2.11, nakada
 
 **ese774_frame v0.4.20** 以降がマスト

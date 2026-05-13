@@ -4,6 +4,7 @@ Kengo NAKADA:
 https://github.com/shimane-dev, https://github.com/kengo-nakada
 kengo.nakada@mat.shimane-u.ac.jp, kengo.nakada@gmail.com
 """
+
 from pathlib import Path
 
 from aandd_reader.config import Config
@@ -14,11 +15,12 @@ from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
 from ese774_frame.api_server import FastApiServer
 from x_logger.x_logger import XLogger
 
-
 if __name__ == "__main__":
-    HERE = Path(__file__).parent
+    # HERE = Path(__file__).parent
+    # Config.load_yaml(HERE / "config_aandd1_server1.yaml")
+    # Config.load_yaml("config_aandd1_server1.yaml")
+    Config.load_yaml("config_aandd2_server4.yaml")
 
-    Config.load_yaml(HERE / "config_server1.yaml")
     logger = XLogger(
         log_level="debug",
         logger_name=Config.SERVER_LOGGER_NAME,
