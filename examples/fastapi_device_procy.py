@@ -48,6 +48,7 @@ async def main():
         config=Config,
         logger=logger,
         log_level=log_level,
+        async_mode=True,
     )
     ret = await client.meas()
     print(ret)
