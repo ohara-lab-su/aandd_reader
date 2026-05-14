@@ -13,7 +13,7 @@
 # from aandd_reader.server_grpc.aandd_reader_grpc_server import aandd_reader_server
 
 # gRPC Client
-from aandd_reader.server_grpc.aandd_reader_grpc_client import AanddReaderGrpcClient
+# from aandd_reader.server_grpc.aandd_reader_grpc_client import AanddReaderGrpcClient
 
 # Ctrl
 from aandd_reader.aandd_reader import AanddReader
