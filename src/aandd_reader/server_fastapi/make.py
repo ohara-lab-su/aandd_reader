@@ -1,32 +1,51 @@
 #!/usr/bin/env python
 """
-1.	API spec（FastAPI 側の定義）から機械的に pyi を生成
-2.	その pyi を後処理で「現実の Python クラス構造」に合わせて修正
-3.	router 側の pyi は従来どおり素直に生成
+server_fastapi 用の生成スクリプトである。
 
-味噌は
-pyi は「.py を上書きする仕様」であり、
-pyi に書いていない事実（継承・自前メソッド）は「存在しない」扱いになる
+このスクリプトは次を行う。
 
-つまり、継承したクラス(親クラスのpyi)が存在するが。
-その継承したclassをオーバーライトしている pyi はそのままでは機能しない
+1. API spec から client / router の pyi を生成する。
+2. 生成された client pyi を、実際の Python クラス構造に合わせて補正する。
+3. server_fastapi/__init__.py を生成し、DeviceProxy 用の登録を行う。
+4. server_fastapi/__init__.pyi を生成し、DeviceProxy 登録後の公開 API を型補完へ反映する。
 
-生成後の pyi を現実のクラス構造に合わせて補正する必要がある
-つまり API spec に載っていない時前メソッドを pyi についか
+pyi は同名の .py を型検査上は上書きするため、生成された pyi に継承関係や
+.py 側で定義された補助メソッドが書かれていない場合、それらは存在しないものとして
+扱われる。このため、API spec から機械生成した pyi をそのまま使わず、実装クラスの
+実態に合わせて後処理する。
+
+DeviceProxy 登録は server_fastapi 層に閉じ込める。デバイス本体クラスや config は
+ここでは import しない。ローカル制御層と FastAPI/DeviceProxy 層の依存方向を分離するためである。
 """
 import os
+import re
 from contextlib import contextmanager
 
-# make
-from ese774_frame.routers.make_pyi_device_router import (
-    make_pyi_device_router,
-)
-
-from ese774_frame.clients.make_pyi_device_client import (
-    make_pyi_device_client,
-)
+from ese774_frame.clients.make_pyi_device_client import make_pyi_device_client
+from ese774_frame.routers.make_pyi_device_router import make_pyi_device_router
 
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
+
+
+CLIENT_DIR = "clients"
+ROUTER_DIR = "routers"
+
+ASYNC_CLIENT_PYI = "async_aandd_reader_client.pyi"
+SYNC_CLIENT_PYI = "sync_aandd_reader_client.pyi"
+ROUTER_PYI = "aandd_reader_router.pyi"
+INIT_PY = "__init__.py"
+INIT_PYI = "__init__.pyi"
+
+ASYNC_CLIENT_CLASS = "AsyncAanddReaderClient"
+SYNC_CLIENT_CLASS = "SyncAanddReaderClient"
+ROUTER_CLASS = "AanddReaderRouter"
+
+DEVICE_PROXY_NAME = "AanddReader"
+DEVICE_PROXY_ALIASES = [
+    "aandd",
+    "AandDReader",
+    "aandd_reader",
+]
 
 
 @contextmanager
@@ -39,93 +58,247 @@ def chdir(path):
         os.chdir(prev_cwd)
 
 
-def _patch_pyi_inheritance_and_extras(
-    *,
-    filename: str,
-    base_import_line: str,
-    class_name: str,
-    base_class_name: str,
-    extra_method_lines: list[str],
-) -> None:
+def _read_lines(filename):
     with open(filename, "r", encoding="utf-8") as f:
-        lines = f.read().splitlines()
+        return f.read().splitlines()
 
-    out: list[str] = []
 
-    # 1) base import を入れる（重複は避ける）
-    already_has_base_import = False
-    for line in lines:
-        if line.strip() == base_import_line.strip():
-            already_has_base_import = True
-            break
+def _write_lines(filename, lines):
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
 
+
+def _ensure_import(lines, import_line):
+    """
+    import_line を class 定義より前に一度だけ挿入する。
+    生成器の import 順序に強く依存しないよう、最初の class の直前を挿入位置にする。
+    """
+    if any(line.strip() == import_line.strip() for line in lines):
+        return lines
+
+    out = []
     inserted = False
     for line in lines:
-        # import ブロックの末尾あたりに挿入（class より前）
-        if inserted is False:
-            if line.startswith("class "):
-                if already_has_base_import is False:
-                    out.append(base_import_line)
-                inserted = True
-
-        # 2) class 定義を継承付きに置換
-        if line.startswith(f"class {class_name}:"):
-            out.append(f"class {class_name}({base_class_name}):")
-            continue
-
+        if not inserted and line.startswith("class "):
+            out.append(import_line)
+            inserted = True
         out.append(line)
 
-    # 3) 自前メソッド（API spec 外）を末尾に足す
-    #    pyi が .py を隠すので、ここに無いメソッドは「存在しない」扱いになる
-    if extra_method_lines:
-        # 末尾に空行を入れて追記
-        if len(out) > 0:
-            if out[-1].strip() != "":
-                out.append("")
-        out.extend(extra_method_lines)
+    if not inserted:
+        out.append(import_line)
+
+    return out
+
+
+def _replace_class_base(lines, class_name, base_class_name):
+    """
+    class ClassName: と class ClassName(...): の両方を受け、基底クラスを明示する。
+    """
+    out = []
+    pattern = re.compile(r"^(class\s+" + re.escape(class_name) + r")\s*(?:\([^)]*\))?:\s*$")
+    target = "class {}({}):".format(class_name, base_class_name)
+
+    for line in lines:
+        if pattern.match(line):
+            out.append(target)
+        else:
+            out.append(line)
+
+    return out
+
+
+def _find_class_block(lines, class_name):
+    start = None
+    pattern = re.compile(r"^class\s+" + re.escape(class_name) + r"(?:\(|:)")
+
+    for i, line in enumerate(lines):
+        if pattern.match(line):
+            start = i
+            break
+
+    if start is None:
+        raise RuntimeError("class not found in generated pyi: {}".format(class_name))
+
+    end = len(lines)
+    for i in range(start + 1, len(lines)):
+        line = lines[i]
+        if line and not line.startswith((" ", "\t", "#")):
+            end = i
+            break
+
+    return start, end
+
+
+def _member_signature_key(member_line):
+    stripped = member_line.strip()
+    if stripped.startswith("def "):
+        return stripped.split("(", 1)[0]
+    if stripped.startswith("async def "):
+        return stripped.split("(", 1)[0]
+    if stripped.startswith("@"):
+        return stripped
+    return stripped
+
+
+def _ensure_class_members(lines, class_name, member_lines):
+    """
+    API spec 外の .py 実装メソッドを pyi の class ブロック内に一度だけ追加する。
+    単純なファイル末尾追記ではなく class ブロックの末尾へ挿入するため、後続の
+    トップレベル定義が増えた場合でも壊れにくい。
+    """
+    if not member_lines:
+        return lines
+
+    start, end = _find_class_block(lines, class_name)
+    class_lines = lines[start:end]
+    existing_keys = set(_member_signature_key(line) for line in class_lines)
+
+    missing = []
+    for member in member_lines:
+        key = _member_signature_key(member)
+        if key in existing_keys:
+            continue
+        missing.append(member)
+
+    if not missing:
+        return lines
+
+    out = list(lines[:end])
+    if out and out[-1].strip() != "":
+        out.append("")
+    out.extend(missing)
+    out.extend(lines[end:])
+    return out
+
+
+def _patch_pyi_inheritance_and_extras(
+    filename,
+    base_import_line,
+    class_name,
+    base_class_name,
+    extra_method_lines,
+):
+    lines = _read_lines(filename)
+    lines = _ensure_import(lines, base_import_line)
+    lines = _ensure_import(lines, "from typing import Any")
+    lines = _replace_class_base(lines, class_name, base_class_name)
+    lines = _ensure_class_members(lines, class_name, extra_method_lines)
+    _write_lines(filename, lines)
+
+
+def _make_string_list_literal(items, indent="    "):
+    if not items:
+        return "[]"
+
+    lines = ["["]
+    for item in items:
+        lines.append('{}"{}",'.format(indent, item))
+    lines.append("]")
+    return "\n".join(lines)
+
+
+def _write_device_proxy_init_py(filename):
+    """
+    server_fastapi/__init__.py を生成する。
+
+    ここでは server_fastapi 層の公開物だけを扱う。AanddReader 本体や Config は
+    ローカル制御層の責務であり、DeviceProxy 登録には不要なので import しない。
+    """
+    aliases_text = _make_string_list_literal(DEVICE_PROXY_ALIASES, indent="    ")
+
+    text = '''#!/usr/bin/env python
+"""
+aandd_reader FastAPI client / router / DeviceProxy registration.
+
+このモジュールは FastAPI/DeviceProxy 層の公開インターフェースである。
+ローカル制御クラス AanddReader には依存しない。
+"""
+from aandd_reader.server_fastapi.clients.async_aandd_reader_client import (
+    AsyncAanddReaderClient,
+)
+from aandd_reader.server_fastapi.clients.sync_aandd_reader_client import (
+    SyncAanddReaderClient,
+)
+from aandd_reader.server_fastapi.routers.aandd_reader_router import AanddReaderRouter
+from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
+
+from ese774_frame.clients import register_device_proxy
+
+
+DEVICE_PROXY_NAME = "{device_proxy_name}"
+DEVICE_PROXY_ALIASES = {aliases}
+
+
+register_device_proxy(
+    DEVICE_PROXY_NAME,
+    async_client_cls=AsyncAanddReaderClient,
+    sync_client_cls=SyncAanddReaderClient,
+    api_spec=aandd_reader_api_spec,
+    default_async_mode=True,
+    aliases=DEVICE_PROXY_ALIASES,
+)
+
+
+__all__ = [
+    "DEVICE_PROXY_NAME",
+    "DEVICE_PROXY_ALIASES",
+    "AsyncAanddReaderClient",
+    "SyncAanddReaderClient",
+    "AanddReaderRouter",
+    "aandd_reader_api_spec",
+]
+'''.format(
+        device_proxy_name=DEVICE_PROXY_NAME,
+        aliases=aliases_text,
+    )
 
     with open(filename, "w", encoding="utf-8") as f:
-        f.write("\n".join(out) + "\n")
+        f.write(text)
 
 
-# Normal
-# with chdir("clients"):
-#     # Async client
-#     make_pyi_device_client(
-#         filename="async_aandd_reader_client.pyi",
-#         api_spec=aandd_reader_api_spec,
-#         class_name="AsyncAanddReaderClient",
-#         async_mode=True,
-#     )
-#
-#     # Sync client
-#     make_pyi_device_client(
-#         filename="sync_aandd_reader_client.pyi",
-#         api_spec=aandd_reader_api_spec,
-#         class_name="SyncAanddReaderClient",
-#         async_mode=False,
-#     )
+def _write_device_proxy_init_pyi(filename):
+    """
+    server_fastapi/__init__.pyi を生成する。
+
+    __init__.py が DeviceProxy 登録の実行場所であるため、同じ公開名を pyi にも明示する。
+    ここに書かない公開名は型検査・補完上は存在しない扱いになる。
+    """
+    text = '''from typing import Any, List
+
+from aandd_reader.server_fastapi.clients.async_aandd_reader_client import (
+    AsyncAanddReaderClient,
+)
+from aandd_reader.server_fastapi.clients.sync_aandd_reader_client import (
+    SyncAanddReaderClient,
+)
+from aandd_reader.server_fastapi.routers.aandd_reader_router import AanddReaderRouter
+
+DEVICE_PROXY_NAME: str
+DEVICE_PROXY_ALIASES: List[str]
+aandd_reader_api_spec: Any
+
+__all__: List[str]
+'''
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(text)
 
 
-def main() -> None:
-
-    # === 変更: make.py の make_pyi 呼び出し部（差し替え） ===
-    with chdir("clients"):
-        # Async client
+def make_client_pyi():
+    with chdir(CLIENT_DIR):
         make_pyi_device_client(
-            filename="async_aandd_reader_client.pyi",
+            filename=ASYNC_CLIENT_PYI,
             api_spec=aandd_reader_api_spec,
-            class_name="AsyncAanddReaderClient",
+            class_name=ASYNC_CLIENT_CLASS,
             async_mode=True,
         )
-
         _patch_pyi_inheritance_and_extras(
-            filename="async_aandd_reader_client.pyi",
+            filename=ASYNC_CLIENT_PYI,
             base_import_line="from ese774_frame.clients.async_device_client import AsyncDeviceClient",
-            class_name="AsyncAanddReaderClient",
+            class_name=ASYNC_CLIENT_CLASS,
             base_class_name="AsyncDeviceClient",
             extra_method_lines=[
-                "    # --- methods defined in .py (pyi が .py を隠すため明示) ---",
+                "    # --- methods defined in .py, not in api_spec ---",
                 "    @staticmethod",
                 "    def _sync_await(coro) -> Any: ...",
                 "    async def start_watch_listener(self, threshold: float, hysteresis: float, on_event: Any, timeout_sec: float = ...) -> Any: ...",
@@ -133,31 +306,39 @@ def main() -> None:
             ],
         )
 
-        # Sync client
         make_pyi_device_client(
-            filename="sync_aandd_reader_client.pyi",
+            filename=SYNC_CLIENT_PYI,
             api_spec=aandd_reader_api_spec,
-            class_name="SyncAanddReaderClient",
+            class_name=SYNC_CLIENT_CLASS,
             async_mode=False,
         )
-
-        # 生成後の pyi を現実のクラス構造に合わせて補正する
-        # つまり API spec に載っていない時前メソッドを pyi についか
         _patch_pyi_inheritance_and_extras(
-            filename="sync_aandd_reader_client.pyi",
+            filename=SYNC_CLIENT_PYI,
             base_import_line="from ese774_frame.clients.sync_device_client import SyncDeviceClient",
-            class_name="SyncAanddReaderClient",
+            class_name=SYNC_CLIENT_CLASS,
             base_class_name="SyncDeviceClient",
             extra_method_lines=[],
         )
 
-    with chdir("routers"):
-        # router Device
+
+def make_router_pyi():
+    with chdir(ROUTER_DIR):
         make_pyi_device_router(
-            filename="aandd_reader_router.pyi",
+            filename=ROUTER_PYI,
             api_spec=aandd_reader_api_spec,
-            class_name="AanddReaderRouter",
+            class_name=ROUTER_CLASS,
         )
+
+
+def make_device_proxy_init_files():
+    _write_device_proxy_init_py(INIT_PY)
+    _write_device_proxy_init_pyi(INIT_PYI)
+
+
+def main():
+    make_client_pyi()
+    make_router_pyi()
+    make_device_proxy_init_files()
 
 
 if __name__ == "__main__":

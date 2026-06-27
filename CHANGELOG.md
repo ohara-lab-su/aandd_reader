@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 2026.06.27 v0.2.13, nakada
+
+**ese774_frame v0.4.20** 以降がマスト
+
+- DeviceProxy 対応に合わせて make.py を更新
+- server_fastapi/__init__.py の自動生成に対応
+- server_fastapi/__init__.pyi の自動生成に対応
+- DeviceProxy 登録コードを make.py から生成する方式へ変更
+- pyi 生成処理を見直し、既存の補正・コード挿入機能を維持したまま DeviceProxy 対応を追加
+- フレームとの分離性を維持した生成構造へ整理
+ 
 ## 2026.05.13 v0.2.12, nakada (test DeviceProxy)
 
 **ese774_frame v0.4.20** 以降がマスト
