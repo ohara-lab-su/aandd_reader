@@ -14,17 +14,18 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-"pyserial",
-"nest_asyncio",
-"pydantic",
-"pyyaml",
-"pytest",
-"sphinx",
-"myst-parser",
-"sphinx-autobuild",
-"sphinx-rtd-theme",
-"sphinxcontrib-napoleon",
-"linkify-it-py"
+    "xlogger-py",
+    "pyserial",
+    "nest_asyncio",
+    "pydantic",
+    "pyyaml",
+    "pytest",
+    "sphinx",
+    "myst-parser",
+    "sphinx-autobuild",
+    "sphinx-rtd-theme",
+    "sphinxcontrib-napoleon",
+    "linkify-it-py"
 ]
 
 [tool.pytest.ini_options]
