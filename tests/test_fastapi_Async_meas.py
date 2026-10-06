@@ -16,7 +16,7 @@ async def test_fastapi_async_meas():
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     from aandd_reader import Config
-    from aandd_reader import AsyncAanddReaderClient
+    from aandd_reader.server import AsyncAanddReaderClient
     from x_logger import XLogger
 
     Config.load_yaml("config_server.yaml")
