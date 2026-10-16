@@ -1,4 +1,4 @@
-from typing import Optional, Any, Dict, overload, Union
+from typing import Optional, Any, Dict, List, Tuple, Sequence, Mapping, Callable, Type, Literal, overload, Union
 import httpx
 from httpx import Response
 from aandd_reader.server_fastapi.models.comman import ResultResponse, SetMeasModeRequest
@@ -9,7 +9,7 @@ class AsyncAanddReaderClient(AsyncDeviceClient):
     _client: httpx.AsyncClient
     _logger: Any
     _base_url: str
-    _api_spec: list = None
+    _api_spec: Optional[list] = None
     def __init__(self, config: Any = ..., server_ip: str = ..., server_port: int = ..., base_url: str = ..., api_spec: Optional[list] = None, logger: Optional[Any] = None, log_level: str = ..., object_name: str = ...): ...
     async def _post(self, url, **kwargs) -> Any: ...
     async def dispatch(self, method: str, *args, **kwargs) -> Any: ...
