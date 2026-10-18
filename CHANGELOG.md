@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026.10.09 v0.2.14, nakada
+
+- DeviceProxy 型で使えるように改修
+
 ## 2026.06.27 v0.2.13, nakada
 
 **ese774_frame v0.4.20** 以降がマスト

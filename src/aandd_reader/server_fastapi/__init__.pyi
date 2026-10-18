@@ -1,15 +1,15 @@
-from typing import Any, List
+from __future__ import annotations
 
-from aandd_reader.server_fastapi.clients.async_aandd_reader_client import (
-    AsyncAanddReaderClient,
-)
-from aandd_reader.server_fastapi.clients.sync_aandd_reader_client import (
-    SyncAanddReaderClient,
-)
-from aandd_reader.server_fastapi.routers.aandd_reader_router import AanddReaderRouter
+from typing import Any, Callable, Literal, overload
+from aandd_reader.server_fastapi.clients.async_aandd_reader_client import AsyncAanddReaderClient
+from aandd_reader.server_fastapi.clients.sync_aandd_reader_client import SyncAanddReaderClient
 
-DEVICE_PROXY_NAME: str
-DEVICE_PROXY_ALIASES: List[str]
-aandd_reader_api_spec: Any
+@overload
+def DeviceProxy(device_class: Literal['AanddReader', 'aandd', 'AandDReader', 'aandd_reader'], *args: Any, async_mode: Literal[True], **kwargs: Any) -> AsyncAanddReaderClient: ...
+@overload
+def DeviceProxy(device_class: Literal['AanddReader', 'aandd', 'AandDReader', 'aandd_reader'], *args: Any, async_mode: Literal[False], **kwargs: Any) -> SyncAanddReaderClient: ...
+@overload
+def DeviceProxy(device_class: Literal['AanddReader', 'aandd', 'AandDReader', 'aandd_reader'], *args: Any, async_mode: None = None, **kwargs: Any) -> AsyncAanddReaderClient: ...
+def DeviceProxy(device_class: str, *args: Any, async_mode: bool | None = None, **kwargs: Any) -> AsyncAanddReaderClient | SyncAanddReaderClient: ...
 
-__all__: List[str]
+def create_device_proxy(device_class: Literal['AanddReader', 'aandd', 'AandDReader', 'aandd_reader']) -> Callable[..., AsyncAanddReaderClient | SyncAanddReaderClient]: ...

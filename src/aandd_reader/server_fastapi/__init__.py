@@ -5,6 +5,9 @@ aandd_reader FastAPI client / router / DeviceProxy registration.
 このモジュールは FastAPI/DeviceProxy 層の公開インターフェースである。
 ローカル制御クラス AanddReader には依存しない。
 """
+from ese774_frame import DeviceProxy
+from ese774_frame.clients import register_device_proxy
+
 from aandd_reader.server_fastapi.clients.async_aandd_reader_client import (
     AsyncAanddReaderClient,
 )
@@ -13,8 +16,6 @@ from aandd_reader.server_fastapi.clients.sync_aandd_reader_client import (
 )
 from aandd_reader.server_fastapi.routers.aandd_reader_router import AanddReaderRouter
 from aandd_reader.server_fastapi.spec_ctrl import aandd_reader_api_spec
-
-from ese774_frame.clients import register_device_proxy
 
 
 DEVICE_PROXY_NAME = "AanddReader"
@@ -42,4 +43,5 @@ __all__ = [
     "SyncAanddReaderClient",
     "AanddReaderRouter",
     "aandd_reader_api_spec",
+    "DeviceProxy",
 ]

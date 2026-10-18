@@ -12,8 +12,9 @@ import time
 import logging
 from pathlib import Path
 
-from ese774_frame import DeviceProxy
+#from ese774_frame import DeviceProxy
 from aandd_reader import Config
+from aandd_reader.server_fastapi import DeviceProxy
 import aandd_reader.server
 
 # from aandd_reader import AsyncAanddReaderClient
