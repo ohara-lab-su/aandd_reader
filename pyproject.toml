@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aand_reader"
+name = "aand-reader"
 
-version = "0.2.14"
+version = "0.2.15"
 
 description = "aandd_reader"
 authors = [
@@ -15,6 +15,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "xlogger-py",
+    #
     "pyserial",
     "nest_asyncio",
     "pydantic",
