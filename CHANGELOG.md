@@ -2,57 +2,56 @@
 
 ## 2026.10.09 v0.2.14, nakada
 
-- DeviceProxy 型で使えるように改修
+- Updated the implementation to support the `DeviceProxy` type.
 
 ## 2026.06.27 v0.2.13, nakada
 
-**ese774_frame v0.4.20** 以降がマスト
+**Requires ese774_frame v0.4.20 or later.**
 
-- DeviceProxy 対応に合わせて make.py を更新
-- server_fastapi/__init__.py の自動生成に対応
-- server_fastapi/__init__.pyi の自動生成に対応
-- DeviceProxy 登録コードを make.py から生成する方式へ変更
-- pyi 生成処理を見直し、既存の補正・コード挿入機能を維持したまま DeviceProxy 対応を追加
-- フレームとの分離性を維持した生成構造へ整理
- 
-## 2026.05.13 v0.2.12, nakada (test DeviceProxy)
+- Updated `make.py` for `DeviceProxy` support.
+- Added automatic generation of `server_fastapi/__init__.py`.
+- Added automatic generation of `server_fastapi/__init__.pyi`.
+- Changed the approach so `make.py` generates the `DeviceProxy` registration code.
+- Revised `.pyi` generation to support `DeviceProxy` while retaining existing correction and code-insertion features.
+- Reorganized code generation to maintain separation from the framework.
 
-**ese774_frame v0.4.20** 以降がマスト
+## 2026.05.13 v0.2.12, nakada (DeviceProxy test)
 
-- DeviceProxy のテスト
-- __init__ 関係の修正
-- DeviceProxy サンプル追加
+**Requires ese774_frame v0.4.20 or later.**
 
-## 2026.05.13 v0.2.11, nakada
-
-**ese774_frame v0.4.20** 以降がマスト
-
-config のパス設定を新しい方式(cobotta2 v0.13.8)
-に合わせる
+- Tested `DeviceProxy`.
+- Fixed `__init__`-related code.
+- Added a `DeviceProxy` example.
 
 ## 2026.05.13 v0.2.11, nakada
 
-**ese774_frame v0.4.20** 以降がマスト
+**Requires ese774_frame v0.4.20 or later.**
 
-```__ini__.py``` において、```DeviceProxy``` への register を追加
+- Updated configuration path handling to follow the new approach used by cobotta2 v0.13.8.
+
+## 2026.05.13 v0.2.11, nakada
+
+**Requires ese774_frame v0.4.20 or later.**
+
+- Added `DeviceProxy` registration in `__ini__.py` (filename as written in the original changelog).
 
 ## 2026.03.15 v0.2.10, nakada
 
-- ドキュメント整備
-- 出張前 FINALバージョン(2026.03.15)
+- Updated documentation.
+- Final version before the business trip (2026-03-15).
 
 ## 2026.03.09 v0.2.9, nakada
 
-ドキュメント整備
+- Updated documentation.
 
 ## 2026.02.27 v0.2.8, nakada
 
-名前空間とリポジトリ名を変更・調整
+Renamed and adjusted the namespace and repository name:
 
-- 旧: fastapi_frame
-- 新: ese774_frame
+- Previous: `fastapi_frame`
+- New: `ese774_frame`
 
-調整パッケージ
+Related package versions:
 
 - ese774_frame: 0.4.13
 - cobotta2: 0.10.3
@@ -61,112 +60,102 @@ config のパス設定を新しい方式(cobotta2 v0.13.8)
 
 ## 2026.02.04 v0.2.7, nakada
 
-server.py
-少しでも巡回インポートが起こるケースを潰すために、ctrl系とサーバー系のルートを別にする
+- In `server.py`, separated the control-class and server import paths to reduce the possibility of circular imports.
 
 ## 2026.02.04 v0.2.6, nakada
 
-差分
+- Changes (not specified in the original changelog).
 
 ## 2026.02.04 v0.2.5, nakada
 
-差分
+- Changes (not specified in the original changelog).
 
 ## 2026.02.04 v0.2.4, nakada
 
-- async 対応版
+- Added asynchronous support.
 
 ## 2026.02.04 v0.2.3, nakada
 
-- server/start (example側) script のバグ修正
-- client 側に追加している trigger モードなどの機能を
-prepared に反映してたものを　example についか
- 
+- Fixed bugs in the server/start scripts under `examples`.
+- Moved client-side features such as trigger modes, previously reflected in `prepared`, into examples.
+
 ## 2026.02.04 v0.2.2, nakada
 
-若干のバグ修正/トリガー機能(閾値判定)の拡張（使うのに利便性を伴った改修）
+Minor bug fixes and improvements to trigger functionality (threshold detection) for easier use:
 
-- Evnet 機能の追加修正
-  - 閾値判定に使う値を平均使うか？(その時の平均のウィンドウ幅)
-  - ST 値を判定に使うか？
-  - raw 値で判定するか？
-  - 閾値判定を上下どちらでも
-- これらのイベント機能および onece などの制御を client 側の prepared にまとめた。
+- Added and revised event functionality:
+  - Select whether to use the mean for threshold detection, including the averaging window width.
+  - Option to use the ST value for detection.
+  - Option to use the raw value for detection.
+  - Support threshold detection in either direction (above or below).
+- Consolidated event features and controls such as `once` into client-side `prepared`.
 
 ## 2026.02.04 v0.2.1, nakada
 
-bugfix
+- Bug fixes.
 
 ## 2026.02.04 v0.2.0, nakada
 
-- aandd_reader.py (v0.2.0)
-- gRPC_frame.py (v0.4.4)
+- `aandd_reader.py` (v0.2.0)
+- `gRPC_frame.py` (v0.4.4)
 
-修正内容
+Changes:
 
-- Event モードの動作テストおよびそれ位対して若干の改修
-- 天秤側の動作モードを少し勘違いしていたのを修正(基本クラスの修正) <- これが v0.2.0 へのバージョン変更の理由
-- make_pyi.py 修正(dispatchされる継承元と継承先)
-- stream モード中に(スレッド動作中に) meas()をうごかしたときは、インスタンス変数値をとる
-  - インスタンス変数は readline でストリームの値を取得し続けいる
+- Tested event mode and made minor adjustments.
+- Corrected a misunderstanding of balance operating modes in the base control class; this was the reason for the version change to v0.2.0.
+- Fixed `make_pyi.py` (the inheritance source and destination for dispatched methods).
+- When `meas()` is called during streaming (while the worker thread is running), it reads the instance variable instead:
+  - The instance variable is continuously updated with stream values obtained by `readline`.
 
-## 2026.02.04 v0.1.1, nakada, (gRPC 利用モードの実装)
+## 2026.02.04 v0.1.1, nakada (gRPC mode implementation)
 
-- bugfix
-  - grpc_client_stream_event.py
-    - イベントを実際に使ったストリーム利用例
-  - aandd_reader.py
-    - デバイス制御(ストレームモードを使える形に整備)
-    - そのほか細かくないバグ(バージョンごとに変えたことの不整合)修正
-    - スレッドとEventフラグ周りの整理と一緒にメソッド周りを整理
-  - aandd_reader_grpc_client.py
+Bug fixes:
 
-## 2026.02.04 v0.1.0, nakada, (gRPC 利用モードの実装)
+- `grpc_client_stream_event.py`: example of event-based stream use.
+- `aandd_reader.py`:
+  - Prepared the device control class for streaming mode.
+  - Fixed other compatibility bugs introduced across versions.
+  - Reorganized methods alongside thread and event-flag handling.
+- `aandd_reader_grpc_client.py`.
 
-- stream未テスト,watch 昨日は削除済み
-- new pyi 作成はテスト済み
+## 2026.02.04 v0.1.0, nakada (gRPC mode implementation)
 
-**gRPC frame の joypad 以外の利用**
+- Streaming untested; watch functionality had already been removed.
+- New `.pyi` generation tested.
 
-- 基本利用: テストOK
-- event は gRPC を用いて再度実装やり直し中
+**Use of the gRPC framework beyond the joypad application:**
 
- 
-## 2026.02.04 v0.0.6, nakada (stream未テスト, pyi はテスト済み)
+- Basic operation: tested successfully.
+- Event handling: being reimplemented using gRPC.
 
-- `.pyi` が実装ファイルを隠す仕様により、
-  `AsyncAanddReaderClient` 側でオーバーライド・追加している
-  - `start_watch_listener`
-  - `stop_watch_listener`
-  などの **stream / watch 補助メソッドが存在しない扱いになる問題を修正**。
+## 2026.02.04 v0.0.6, nakada (streaming untested; .pyi tested)
+
+- Fixed a problem where `.pyi` files hide implementation-file members from type checking, causing stream/watch helper methods overridden or added in `AsyncAanddReaderClient`—such as `start_watch_listener` and `stop_watch_listener`—to appear missing.
 
 ## 2026.02.03 v0.0.5, nakada
 
-alpha版(正式に使える形になってない)
-
-- stream モードで動作する スレッド型
-  - client から longpolling されて
-  - 重さが閾値を超えたら client 側で好きな実行が可能にする
-
+- Alpha release (not yet ready for regular use).
+- Thread-based streaming mode:
+  - The client uses long polling.
+  - When the measured weight exceeds a threshold, a client-side action can be executed.
 
 ## 2026.01.27 v0.0.4, nakada
 
-- bugfix
-- reset fnc
+- Bug fixes.
+- Reset function.
 
 ## 2025.10.16 v0.0.3, nakada
 
-- added sphinx module (project.toml)
- 
+- Added Sphinx module (`project.toml`, as written in the original changelog).
+
 ## 2025.09.1 v0.0.2, nakada
 
-- fix toml
- 
+- Fixed TOML.
+
 ## 2025.07.29 v0.0.1, nakada
 
-namespace 調整
+- Adjusted namespace.
 
 ## 2025.07.29 v0.0.0, nakada
 
-- 暫定リリース(FastAPI / local)
-
+- Provisional release (FastAPI / local).

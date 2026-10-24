@@ -1,37 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCS_DIR="$SCRIPT_DIR"
+DOCS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$DOCS_DIR/.." && pwd)"
-SRC_DIR="$ROOT_DIR/src"
+SRC_DIR="$ROOT_DIR/src/aandd_reader"
+STAGE_DIR="$DOCS_DIR/_generated"
+OUTPUT_DIR="$DOCS_DIR/_build/html"
 
-PKG_NAME="aandd_reader"   # パッケージ名を明示
+if [[ ! -d "$SRC_DIR" ]]; then
+    echo "ERROR: package directory not found: $SRC_DIR" >&2
+    exit 1
+fi
 
-export PYTHONPATH="$SRC_DIR:${PYTHONPATH:-}"
+export AANDD_READER_REPO_ROOT="$ROOT_DIR"
+export PYTHONPATH="$ROOT_DIR/src:${PYTHONPATH:-}"
 
-echo "Cleaning build..."
-rm -rf "$DOCS_DIR/_build" "$DOCS_DIR/api"
-mkdir -p "$DOCS_DIR/api" "$DOCS_DIR/_static"
+rm -rf "$STAGE_DIR" "$DOCS_DIR/_build"
+mkdir -p "$OUTPUT_DIR"
 
-echo "Generating API stubs with sphinx-apidoc..."
-sphinx-apidoc -o "$DOCS_DIR/api" "$SRC_DIR/$PKG_NAME" -f --module-first
+for lang in en ja; do
+    mkdir -p "$STAGE_DIR/$lang"
+    cp -R "$DOCS_DIR/$lang/." "$STAGE_DIR/$lang/"
+    mkdir -p "$STAGE_DIR/$lang/api"
+    sphinx-apidoc --force --module-first -o "$STAGE_DIR/$lang/api" "$SRC_DIR"
+    if [[ ! -f "$STAGE_DIR/$lang/api/modules.rst" ]]; then
+        echo "ERROR: API toctree missing ($lang)" >&2
+        exit 1
+    fi
+done
 
-echo "Building HTML..."
-sphinx-build -b html "$DOCS_DIR" "$DOCS_DIR/_build/html"
+# The English source index is built directly at the site root; no redirects.
+sphinx-build -b html -c "$DOCS_DIR" -D language=en "$STAGE_DIR/en" "$OUTPUT_DIR"
+sphinx-build -b html -c "$DOCS_DIR" -D language=en "$STAGE_DIR/en" "$OUTPUT_DIR/en"
+sphinx-build -b html -c "$DOCS_DIR" -D language=ja "$STAGE_DIR/ja" "$OUTPUT_DIR/ja"
 
-# GitHub Pages が Jekyll で _static 等を落とすのを防ぐ（デプロイ方法に依らず害なし）
-: > "$DOCS_DIR/.nojekyll"
-: > "$DOCS_DIR/_build/html/.nojekyll"
+for page in \
+    "$OUTPUT_DIR/index.html" \
+    "$OUTPUT_DIR/api/modules.html" \
+    "$OUTPUT_DIR/tutorials/intro.html" \
+    "$OUTPUT_DIR/en/index.html" \
+    "$OUTPUT_DIR/en/api/modules.html" \
+    "$OUTPUT_DIR/en/tutorials/intro.html" \
+    "$OUTPUT_DIR/ja/index.html" \
+    "$OUTPUT_DIR/ja/api/modules.html" \
+    "$OUTPUT_DIR/ja/tutorials/intro.html"; do
+    if [[ ! -f "$page" ]]; then
+        echo "ERROR: expected HTML missing: $page" >&2
+        exit 1
+    fi
+done
 
-echo "Creating local redirect index.html..."
-cat > "$DOCS_DIR/index.html" << 'HTML'
-<!doctype html>
-<meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=./_build/html/">
-<link rel="canonical" href="./_build/html/">
-<title>Redirecting…</title>
-<p>Redirecting to <a href="./_build/html/">./_build/html/</a></p>
-HTML
-
-echo "Done."
+touch "$OUTPUT_DIR/.nojekyll"
+printf 'Built documentation at %s\n' "$OUTPUT_DIR"

@@ -1,59 +1,21 @@
-# AandD 電子天秤 Reader (AandD reader)
-view on [github](https://github.com/ohara-lab-su/aandd_reader/) / [ohara-lab-su (doc)](https://ohara-lab-su.github.io/)
+# A&D Balance Reader
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://ohara-lab-su.github.io/aandd_reader/en/index.html) [![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://ohara-lab-su.github.io/aandd_reader/ja/index.html)
 
----
+[GitHub](https://github.com/ohara-lab-su/aandd_reader) · [README](https://github.com/ohara-lab-su/aandd_reader/blob/main/README.en.md)
+
+Python interface to A&D electronic balances. Documentation includes manual tutorials and an API reference generated from the current source tree.
+
 ```{toctree}
 :maxdepth: 2
-:caption: Contents:
+:caption: Guides
 
-api/modules
 tutorials/intro
 ```
----
 
-- ese774_frame 対応
-- grpc_frame 対応
+```{toctree}
+:maxdepth: 3
+:caption: API Reference
 
-## 基本的な計測例
-
-```python
-#!/usr/bin/env python
-import sys
-import time
-from aandd_reader import AanddReader
-from x_logger import XLogger
-
-
-if __name__ == "__main__":
-
-    log_mode = "file"
-    logger = XLogger(
-        log_level="info",
-        log_mode=log_mode,
-        log_name="aandd.log",
-        logger_name="aandd_reader",
-    )
-
-    # COMポートを選ぶ
-    # aandd_reader = AanddReader(port="COM4", logger=logger)
-    aandd_reader = AanddReader(port="COM3", logger=logger)
-
-    # Reset
-    aandd_reader.reset()
-    time.sleep(0.5)
-    
-    # 測定
-    ret = aandd_reader.meas()
-    if ret is False:
-        logger.error("Error measuring.")
-        logger.error(ret)
-        sys.exit(1)
-        
-    logger.info(ret)
-
+api/modules
 ```
-
----
-## 作者
-- Kengo NAKADA
