@@ -3,19 +3,19 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/ohara-lab-su/aandd_reader/blob/main/README.en.md)
 [![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://github.com/ohara-lab-su/aandd_reader/blob/main/README.md)
 
-## info
+## Information
 
-- FX-200i 天秤
+- FX-200i balance
 - https://www.aandd.co.jp/pdf_storage/manual/balance/m_fzi_fxi_fziwp_fxiwp.pdf
 
-- USB シリアルコンバータ
+- USB-to-serial converter
   - RS-USB602F
   - https://www.ratocsystems.com/products/rs232c/
-  - RATOC Systems, Inc
-    - windows-driver
+  - RATOC Systems, Inc.
+    - Windows driver
     - https://www.ratocsystems.com/dlsoft/dlsoft_rs232c/dlsoft_232cusb/usb602f_win/
 
-## 使い方(デバイスサーバーの起動)
+## Usage (Starting the Device Server)
 
 ```python
 from aandd_reader.config import Config
@@ -41,11 +41,11 @@ if __name__ == "__main__":
     logger.info(f"PORT = {Config.PORT}")
 
     server = FastApiServer(
-        device_cls=AanddReader,  # 制御クラス
-        router_cls=AanddReaderRouter,  # routerクラス
+        device_cls=AanddReader,  # Device control class
+        router_cls=AanddReaderRouter,  # Router class
         config=Config,
         api_spec=aandd_reader_api_spec,
-        device_kwargs={"port": Config.PORT},  # 制御Classのコンストラクタ引数)
+        device_kwargs={"port": Config.PORT},  # Constructor arguments for the device control class
         logger=logger,
         logger_name=Config.SERVER_LOGGER_NAME,  # LOGGER_NAME
         lifespan_msg_prefix="AANDD",
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 import asyncio
 import logging
 
-# httpx のログを WARNING レベル以上にする（INFO を抑制）
+# Set the httpx logging level to WARNING or higher (suppress INFO messages).
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 from aandd_reader.config import Config
@@ -79,5 +79,5 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
-## 作者
+## Author
 - Kengo NAKADA
