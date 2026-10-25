@@ -2,7 +2,7 @@
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://ohara-lab-su.github.io/aandd_reader/en/index.html) [![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://ohara-lab-su.github.io/aandd_reader/ja/index.html)
 
-[GitHub](https://github.com/ohara-lab-su/aandd_reader) · [README](https://github.com/ohara-lab-su/aandd_reader/blob/main/README.en.md)
+[GitHub repository](https://github.com/ohara-lab-su/aandd_reader/) · [Project documentation](https://ohara-lab-su.github.io/)
 
 Python interface to A&D electronic balances. Documentation includes manual tutorials and an API reference generated from the current source tree.
 
