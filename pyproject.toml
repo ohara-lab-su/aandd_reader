@@ -7,7 +7,7 @@ name = "aandd-reader"
 
 version = "0.2.17"
 
-description = "aandd_reader"
+description = "Python control package for A&D FX-series electronic balances, providing serial measurement and REST device-server access."
 authors = [
   { name="Kengo NAKADA", email="kengo.nakada@email.com" }
 ]
@@ -28,6 +28,12 @@ dependencies = [
     "sphinxcontrib-napoleon",
     "linkify-it-py"
 ]
+
+[project.urls]
+Homepage = "https://ohara-lab-su.github.io/aandd_reader/"
+Documentation = "https://ohara-lab-su.github.io/aandd_reader/"
+Repository = "https://github.com/ohara-lab-su/aandd_reader"
+Issues = "https://github.com/ohara-lab-su/aandd_reader/issues"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
